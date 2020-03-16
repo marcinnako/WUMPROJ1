@@ -9,7 +9,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ## Matkdown TODO:
--U Marcina nie ma litery o z kreska :/ cos z kodowaniem jest nie tak.
+-U Marcina nie ma litery o kreska :/ cos z kodowaniem jest nie tak.
 
 Sprawdzcie u siebie pls
 
@@ -21,7 +21,7 @@ The input must be a UTF-8 encoded text.
 
 ## Wstep
 
-Ponizej znajduje sie raport z analizy zbioru danych dotyczacych klientoW banku.
+Ponizej znajduje sie raport z analizy zbioru danych dotyczacych klientow banku.
 Dane zostaly pobrane z [tej strony](https://www.mldata.io/dataset-details/german_credit_data/#customize_download)
 
 ## Wykres i wczytanie danych oraz biblioteki testowe

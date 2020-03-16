@@ -1,0 +1,44 @@
+---
+title: "KM1Raport"
+author: "Mikolaj Malec,Jakub Kosterna,Marcin Lukaszyk"
+date: "March 16, 2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Matkdown TODO:
+-U Marcina nie ma litery o z kreska :/ cos z kodowaniem jest nie tak.
+
+Sprawdzcie u siebie pls
+
+Blad:
+
+UTF-8 decoding error in KM1Raport.utf8.md at byte offset 180 (f3).
+
+The input must be a UTF-8 encoded text.
+
+## Wstep
+
+Ponizej znajduje sie raport z analizy zbioru danych dotyczacych klientoW banku.
+Dane zostaly pobrane z [tej strony](https://www.mldata.io/dataset-details/german_credit_data/#customize_download)
+
+## Wykres i wczytanie danych oraz biblioteki testowe
+```{r echo=FALSE,warning=FALSE}
+data<-read.csv("german_credit_data_weka_dataset.csv")
+library(ggplot2)
+
+p <- ggplot(data = data,aes(x = duration,y = credit_amount)) +
+  geom_point()
+p
+
+```
+
+
+## Wywolanie sessionInfo() na koniec raportu
+```{r}
+sessionInfo()
+```
+
+

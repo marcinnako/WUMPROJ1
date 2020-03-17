@@ -26,6 +26,43 @@ cleandata[,21] <- as.factor( as.character( loadeddata[,21]))
 levels( cleandata[,21]) <- c("Good","Bad")
 
 #########
-#wst??pna eksploracja
+#wstępna eksploracja
 library(DataExplorer)
 DataExplorer::create_report(cleandata)
+
+########
+#co chce kobieta i meszczyzna
+library(rpivotTable)
+rpivotTable( cleandata,
+             cols = "personal",
+             rows = "purpose",
+             rendererName = "Heatmap",
+             aggregatorName = "Count")
+#wstępna analiza
+#nawięcej: domestic, new car, radio/television
+rpivotTable( cleandata,
+             cols = "personal",
+             rows = "purpose",
+             rendererName = "Bar Chart",
+             aggregatorName = "Count")
+#warto zobaczyć procentowy rozkład: np. kobiety częsciej kupują radio/telewizje, nie kupują używanych samochodów
+
+rpivotTable( cleandata,
+             cols = "personal",
+             rows = "age",
+             rendererName = "Heatmap",
+             aggregatorName = "Count")
+#wstępna analiza
+#wiek: 23-36 lat; mężaci m/f biorą młodo porzyczki; male_d/s są raczej starsi
+
+rpivotTable( cleandata,
+             cols = "customer_type",
+             rows = "purpose",
+             rendererName = "Heatmap",
+             aggregatorName = "Count")
+#warto pokazać procent przyznantch kredytow na każdą rzecz (kołowy i ile przypadków)
+
+library(gpairs)
+gpairs( cleandata, lower.pars=list(scatter="stats"), 
+        outer.rot=c(90,0),
+        scatter.pars=list(pch=19))

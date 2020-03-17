@@ -141,11 +141,74 @@ data_2 <- data_2 %>% mutate(customer_type = ifelse(customer_type == "Good", 1, 0
 ggplot(data_2, aes(x = age, y = customer_type)) +
   geom_jitter(alpha = 0.9, width = 0.1, height = 0.1) +
   ggtitle("Customer type by his age") +
+  ylab("customer type") +
   geom_smooth() +
   theme_bw()
 ```
 
-A właśnie że nie! To starszym powinniśmy mniej ufać.
+A właśnie że nie! To starszym mniej ufamy.
+
+## 3.2.3. Wiek a płeć i stan cywilny a ocena zaufania
+
+Weźmy pod uwagę to co pozornie najważniejsze i sprawdźmy wyniki szacowania wyrabialności klientów na ich podstawie.
+
+Pogrupujmy klientów do grup po 10 lat.
+
+```{r wiek_plec_stan_cywilny, cache = TRUE}
+data_3 <- data %>%
+  select(age, personal, customer_type) %>%
+  mutate(age = as.integer(age / 10) * 10) %>%
+  group_by(age, personal, customer_type) %>%
+  count()
+
+ggplot(data = data_3, aes(x = age, y = n, fill = customer_type)) +
+  geom_col(position = "dodge") +
+  ggtitle("Customer type by sex, marital status and age") +
+  ylab("number of good / bad types") +
+  facet_wrap(~personal) +
+  scale_fill_manual("legend", values = c("Good" = "blue", "Bad" = "red")) +
+  theme_dark()
+```
+
+Jakie wnioski?
+
+1. Najmniej ufamy rozwiedzionym facetom - zwłaszcza tym po 30, im zwykle nie dajemy.
+2. Najbezpieczniejsi za to są też faceci po 30... ale single.
+3. Żonaci to też dobre ziomki.
+4. Kobiety są gorsze od mężczyzn, ale tylko przed 40. Potem raczej spokój, za wyjątkiem 70-tki psującej obraz.
+
+## 3.4.3. Okres kredytu a chęć banku na danie go
+
+Strzelam że przychylniej będzie dać na krótki czas - w końcu im dłuższy okres tym większa szansa na jakiś kryzys, hiperinflację, śmierć czy innego megawirusa.
+
+Pozwolimy sobie wziąć tylko te okresy, na jakie zdecydował się przynajmniej 1% populacji - dla higieny wizualizacji, która nie powinna być myląca.
+
+```{r okres, cache = TRUE}
+n_of_duration <- data %>% select(duration, customer_type) %>%
+  group_by(duration) %>%
+  count()
+n_of_duration <- n_of_duration[n_of_duration$n >= 10, ]
+
+sum(n_of_duration$n)
+```
+
+Jak widać usunęliśmy tylko 70 wierszy z 1000 - biorąc pod uwagę, że pewnie jest podobnie mało osób biorących np. 25 miesięcy zamiast 24 miesięcy a 11 miesięcy zamiast 12, nie powinno to wpłynąć negatywnie na nasz rezultat.
+
+```{r okres_2, cache = TRUE}
+data_4 <- data %>%
+  select(duration, customer_type) %>%
+  inner_join(n_of_duration, by = "duration")
+
+ggplot(data = data_4, aes(x = customer_type)) +
+  geom_bar() +
+  ggtitle("Customer type by duration") +
+  facet_wrap(~duration) +
+  xlab("customer type") +
+  ylab("number of good / bad types") +
+  theme_light()
+```
+
+Rzeczywiście owa zależność jest zauważana. Do okresu jednego roku niemalże każdy dostaje kredyt, z czasem zaś procent maleje. Przy trzech latach osiągamy niemalże po połowie przypadków zaakceptowanych i odrzuconych, a przy 4 latach (na które zdecydowało się o wiele więcej osób niż na 5) większość próśb jest odrzucana.
 
 ## 4. Zakończenie
 

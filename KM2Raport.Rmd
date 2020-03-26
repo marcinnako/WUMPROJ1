@@ -1,0 +1,177 @@
+---
+title: 'Wstęp do Uczenia Maszynowego 2020: projekt I [kamień milowy II]'
+author: "Jakub Kosterna, Marcin Łukaszyk, Mikołaj Malec"
+date: "26 marca 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\tableofcontents
+
+## 1. Odświeżenie
+
+Wpierw wczytajmy postępy, które zrobiliśmy na pierwszym kamieniu milowym. Oprócz wczytania ramki danych i jej eksploracji, obrobiliśmy ją także w celu uzyskania bardziej przystępnej formy - między innymi nadając kolumnom "sensowne" nazwy.
+
+Wczytajmy potrzebne pakiety i przypomnijmy sobie jak wyglądała nasza ramka danych.
+
+```{r pakiety, message = FALSE, warning = FALSE}
+# install.packages("dplyr") # if not installed
+library(dplyr)
+```
+
+```{r wczytajWyczysc, echo = FALSE}
+setwd("C:/Users/ckostern/Desktop/Studia/03 rok II semestr/ML/proj1/WUMPROJ1-master")
+
+data <- read.csv("german_credit_data_weka_dataset.csv")
+
+levels(data[,1]) <- c("low", "fair", "high", "not_have") #DM low<0<fair<200<high
+levels(data[,3]) <- c("all_paid", "all_paid_here", "paid_till_now", "delay", "critical")
+levels(data[,4]) <- c("new_car", "used_car", "furniture/equipment", "radio/television", "domestic", "repairs", "education", "retraining", "business", "other") #note: 0 for vacation
+levels(data[,6]) <- c("low","normal","high","very_high","not_have/unknown") #DM low<100<normal<500<high<1000<very_high
+levels(data[,7]) <- c("unemployed", "less_than_year", "1-3_years", "4-6_yeras","7+_years")
+levels(data[,9]) <- c("male_d/s", "female_d/s/m", "male_single", "male_m/w") #d = divorsed, s = seperated, m = married, w = widowed ,#note: 0 female single
+levels(data[,10]) <- c("none", "co-applicant", "guarantor")
+levels(data[,12]) <- c("real_estate", "building_savings", "car", "not_have/unknown")
+levels(data[,14]) <- c("bank", "stores", "none")
+levels(data[,15]) <- c("rent", "own", "for_free")
+levels(data[,17]) <- c("unskilled_non_resident", "unskilled_resident", "skilled_employee", "highly_qualified_employee*") # also management, self-employed, officer
+levels(data[,19]) <- c("no", "yes")
+levels(data[,20]) <- c("yes", "no")
+data[,21] <- as.factor(as.character(data[,21]))
+levels(data[,21]) <- c("Good", "Bad")
+```
+
+```{r oglad}
+knitr::kable(sample_n(data, 20))
+```
+
+## 2. Czyszczenie - braki, niepoprawne wartości i kluczowe kolumny
+
+Takiego mamy farta, że do czego doszliśmy na pierwszym kamieniu milowym, nie mamy **żadnych braków danych**. Czy wszystkie wartości są jednak poprawne?
+
+Jak wynika z histogramów naszego raportu wygenerowanego dzięki *DataExplorer*, **w przypadku danych kategorycznych wszystkie mamy w wersji poprawnej** - nie ma ani wartości dosłownie jedno-lub parukrotnych sugerujących błąd czy literówkę.
+
+**Patrząc na zmienne liczbowe, także wszystko jest na swoim miejscu** - wiek zawiera się w przedziale <niecałe 20; mniej niż 100>, wartości kredytu to do 20 000 Euro, klient bierze co najwyżej 4 różne pożyczki i ogólnie mamy tu ład i skład.
+
+Podsumowując **nie ma ani outlierów wymagających usunięcia, ani wartości niezgodnych**.
+
+Na chłopski rozum każdy atrybut może być istotny w kwestii oszacowania, czy ryzykujemy z daniem klientowi kredytu.
+
+## 3. Encoding
+
+Mamy 21 kolumn, z czego 14 zawiera kategoryczne zmienne tekstowe. Przekształćmy naszą ramkę danych tak, aby zawierała tylko wartości liczbowe!
+
+## 3.1. Prosty problem zmiennych binarnych
+
+Cechy *telephone*, *foreign_worker* i *customer_type* przyjmują tylko dwie wartości - te pierwsze dwie yes / no, ta ostatnia - Good / Bad. Sprawa prosta - dobre niech będzie jedynką, a złe - zerem.
+
+```{r encoding1}
+data$telephone <- as.character(data$telephone)
+data$telephone[data$telephone == 'yes'] <- 1
+data$telephone[data$telephone == 'no'] <- 0
+
+data$foreign_worker <- as.character(data$foreign_worker)
+data$foreign_worker[data$foreign_worker == 'yes'] <- 1
+data$foreign_worker[data$foreign_worker == 'no'] <- 0
+
+data$customer_type <- as.character(data$customer_type)
+data$customer_type[data$customer_type == 'Good'] <- 1
+data$customer_type[data$customer_type == 'Bad'] <- 0
+```
+
+## 3.2. Kolumny nominalne
+
+... czyli te, których nie można jakoś sensownie uporządkować.
+
+Wartości *purpose* to typowy zbiór elementów nieporównywalnych - [a może jakoś je pogrupować, w stylu wóz nowy / stary do jednego worku, itp?]
+
+TODO
+
+
+*other_debtors*
+
+TODO (kolumny: other_debtors,string,"A101 : none, A102 : co-applicant, A103 : guarantor")
+
+
+*other_installment_plans*
+
+TODO (kolumny: other_installment_plans,string,"A141 : bank, A142 : stores, A143 : none")
+
+
+*housing*
+
+TODO (kolumny: housing,string,"A151 : rent, A152 : own, A153 : for free")
+
+
+## 3.3. Cechy uporządkowane
+
+*savings* jednoznacznie można uporządkować
+
+TODO
+
+
+*present_employment* - niech dłuższy staż pracy według zaproponowanych podziałek będzie większą liczbą dla naturalnych > 0.
+
+TODO
+
+
+## 3.4. Zmienne "mieszane"
+
+## 3.4.1. Dwa w jednym w *checking_account_status*
+
+W przypadku *checking_account_status* mamy właściwie dwie informacje - czy *checking account* jest oraz jak jest - jaki jest jego status. Rozbijmy go na dwie kolumny
+
+TODO (kolumny: "low", "fair", "high", "not_have")
+
+## 3.4.2. *personal* czyli płeć i stan cywilny na raz
+
+W zależności od tego czy mamy styczność z mężczyzną czy z kobietą i jakie dotychczas ta osoba miała przygody z płcią przeciwną, rozbijmy 2x3 unikalne wartości... na jedną binarną (0 - mężczyzna, 1 - kobieta) i jedną ternarną (0 - singiel, 1 - w związku małżeńskim, 2 - rozwodnik / wdowiec).
+
+TODO
+
+## 3.4.3. *credit_history* - czy był brany kredyt i co z tego wyszło
+
+Znowu mamy dwie informacje - czy kredyt był już wcześniej brany i czy grzecznie był on spłacony. Również i z tego stwórzmy dwie kolumny.
+
+TODO (kolumny: "all_paid", "all_paid_here", "paid_till_now", "delay", "critical")
+
+(Info: credit_history,string,"A30: no credits taken/ all credits paid back duly, A31: all credits at this bank paid back duly, A32: existing credits paid back duly till now, A33: delay in paying off in the past, A34 : critical account/ other credits existing (not at this bank)")
+
+## 3.4.4. *property*
+
+Można z tego wyciągnąć informacji na dwie kolumny
+
+TODO
+
+## 3.4.5. *job*
+
+Zrobimy podział skilled / unskilled i unskilled / skilled / highly_qualified (??)
+
+TODO (kolumny: "unskilled_non_resident", "unskilled_resident", "skilled_employee", "highly_qualified_employee*")
+
+## 4. Klasyfikacja
+
+Jednoznaczną zmienną celu naszej ramki danych jest oczywiście *customer_type* - problem opłacalności dania kredytu przez bank klientowi to właśnie to, co chcemy przewidzieć. Podzielmy nasz dataset na X i y.
+
+```{r podzialXy}
+X <- data %>%
+  select(-customer_type)
+y <- data$customer_type
+```
+
+## 5. Podział na zbiór treningowy i testowy
+
+TODO
+
+## 6. Zakończenie
+
+To by było na tyle.
+
+Zobaczmy jeszcze efekt działania funkcji session_info:
+
+```{r session_info}
+sessionInfo()
+```

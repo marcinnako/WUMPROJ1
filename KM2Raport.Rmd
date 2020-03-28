@@ -23,8 +23,10 @@ library(dplyr)
 ```
 
 ```{r wczytajWyczysc, echo = FALSE}
-setwd("C:/Users/ckostern/Desktop/Studia/03 rok II semestr/ML/proj1/WUMPROJ1-master")
+#setwd("C:/Users/ckostern/Desktop/Studia/03 rok II semestr/ML/proj1/WUMPROJ1-master")
+```
 
+```{r, echo=FALSE}
 data <- read.csv("german_credit_data_weka_dataset.csv")
 
 levels(data[,1]) <- c("low", "fair", "high", "not_have") #DM low<0<fair<200<high
@@ -42,6 +44,8 @@ levels(data[,19]) <- c("no", "yes")
 levels(data[,20]) <- c("yes", "no")
 data[,21] <- as.factor(as.character(data[,21]))
 levels(data[,21]) <- c("Good", "Bad")
+
+num_data <- data[, c(2,5,8,11,13,16,18)]
 ```
 
 ```{r oglad}
@@ -64,23 +68,31 @@ Na chłopski rozum każdy atrybut może być istotny w kwestii oszacowania, czy 
 
 Mamy 21 kolumn, z czego 14 zawiera kategoryczne zmienne tekstowe. Przekształćmy naszą ramkę danych tak, aby zawierała tylko wartości liczbowe!
 
-## 3.1. Prosty problem zmiennych binarnych
+## 3.1.1. Prosty problem zmiennych binarnych
 
 Cechy *telephone*, *foreign_worker* i *customer_type* przyjmują tylko dwie wartości - te pierwsze dwie yes / no, ta ostatnia - Good / Bad. Sprawa prosta - dobre niech będzie jedynką, a złe - zerem.
 
 ```{r encoding1}
-data$telephone <- as.character(data$telephone)
-data$telephone[data$telephone == 'yes'] <- 1
-data$telephone[data$telephone == 'no'] <- 0
+# 1 = true, 0 = false
+num_data$has_telephone <- as.numeric(data$telephone) -1
 
-data$foreign_worker <- as.character(data$foreign_worker)
-data$foreign_worker[data$foreign_worker == 'yes'] <- 1
-data$foreign_worker[data$foreign_worker == 'no'] <- 0
+num_data$is_foreign_worker <- as.numeric(data$foreign_worker)
+num_data$is_foreign_worker[ num_data$is_foreign_worker == 2] <- 0
 
-data$customer_type <- as.character(data$customer_type)
-data$customer_type[data$customer_type == 'Good'] <- 1
-data$customer_type[data$customer_type == 'Bad'] <- 0
+num_data$is_good_customer_type <- as.numeric(data$customer_type)
+num_data$is_good_customer_type[ num_data$customer_type == 2] <- 0
 ```
+## 3.1.2. *credit_history* - czy osoba sp??aca kredyt brany kredyt
+
+Przetworzymy kolumny na to czy dana dana osoba ma problemy z p??aceniem kredytu, wiersze paid_till_now rozumiemy jako ??e nie by??o wczesniej problemu z p??aceniem kredytu
+
+TODO (kolumny: "all_paid", "all_paid_here", "paid_till_now", "delay", "critical")
+```{r}
+num_data$has_problems_credit_history <- if_else( data$credit_history %in% c("delay", "critical"), 1, 0)
+```
+
+
+(Info: credit_history,string,"A30: no credits taken/ all credits paid back duly, A31: all credits at this bank paid back duly, A32: existing credits paid back duly till now, A33: delay in paying off in the past, A34 : critical account/ other credits existing (not at this bank)")
 
 ## 3.2. Kolumny nominalne
 
@@ -120,33 +132,34 @@ TODO
 
 ## 3.4. Zmienne "mieszane"
 
-## 3.4.1. Dwa w jednym w *checking_account_status*
+## 3.4.1. *checking_account_status*
 
-W przypadku *checking_account_status* mamy właściwie dwie informacje - czy *checking account* jest oraz jak jest - jaki jest jego status. Rozbijmy go na dwie kolumny
+W przypadku *checking_account_status* mamy właściwie dwie informacje - czy *checking account* jest oraz jak jest - jaki jest jego status. Rozbijmy go na trzy kolumny, czy jest low, fair i high, je????i jest ??adnym z nich to klient go nie ma
 
-TODO (kolumny: "low", "fair", "high", "not_have")
+```{r}
+num_data$low_checking_account_status <- if_else( data$checking_account_status == 'low', 1, 0)
+num_data$fair_checking_account_status <- if_else( data$checking_account_status == 'fair', 1, 0)
+num_data$high_checking_account_status <- if_else( data$checking_account_status == 'high', 1, 0)
+```
 
 ## 3.4.2. *personal* czyli płeć i stan cywilny na raz
 
-W zależności od tego czy mamy styczność z mężczyzną czy z kobietą i jakie dotychczas ta osoba miała przygody z płcią przeciwną, rozbijmy 2x3 unikalne wartości... na jedną binarną (0 - mężczyzna, 1 - kobieta) i jedną ternarną (0 - singiel, 1 - w związku małżeńskim, 2 - rozwodnik / wdowiec).
+W zależności od tego czy mamy styczność z mężczyzną i ich stan cywilny. Podzielimy na 2 kolumny: binarne: p??e?? (is_women) (0 - mężczyzna, 1 - kobieta) oraz czy jest singlem (nie by?? nigdy w zwi??zku)
 
-TODO
+```{r}
+#0 - mężczyzna, 1 - kobieta
+num_data$is_women <- if_else( data$personal == "female_d/s/m", 1, 0)
+#nie ma kobiet singli
+num_data$is_single <- if_else( data$personal == "male_single", 1, 0)
+```
 
-## 3.4.3. *credit_history* - czy był brany kredyt i co z tego wyszło
-
-Znowu mamy dwie informacje - czy kredyt był już wcześniej brany i czy grzecznie był on spłacony. Również i z tego stwórzmy dwie kolumny.
-
-TODO (kolumny: "all_paid", "all_paid_here", "paid_till_now", "delay", "critical")
-
-(Info: credit_history,string,"A30: no credits taken/ all credits paid back duly, A31: all credits at this bank paid back duly, A32: existing credits paid back duly till now, A33: delay in paying off in the past, A34 : critical account/ other credits existing (not at this bank)")
-
-## 3.4.4. *property*
+## 3.4.3. *property*
 
 Można z tego wyciągnąć informacji na dwie kolumny
 
 TODO
 
-## 3.4.5. *job*
+## 3.4.4. *job*
 
 Zrobimy podział skilled / unskilled i unskilled / skilled / highly_qualified (??)
 

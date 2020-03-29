@@ -98,24 +98,41 @@ num_data$has_problems_credit_history <- if_else( data$credit_history %in% c("del
 
 ... czyli te, których nie można jakoś sensownie uporządkować.
 
-Wartości *purpose* to typowy zbiór elementów nieporównywalnych - [a może jakoś je pogrupować, w stylu wóz nowy / stary do jednego worku, itp?]
+Dzieki wiedzy o tym na jaki cel kredytobiorca bierze kredyt mozna sie spodziewac w jakiej sytuacji finansowej jest ta osoba.
+Czesciej bogate osoby biora kredyty na nowy samochod, wakacje czy przebranzowanie.
+Biedne odoby natomiast czesciej biora kredyty na potrzeby domowe jak nowy telewizor lub sprzet domowy
 
-TODO
+
+```{r}
+num_data$purpose <- if_else( data$purpose %in% c("new_car", "education", "retraining", "business", "other" ), 1, 0)
+```
+
 
 
 *other_debtors*
 
-TODO (kolumny: other_debtors,string,"A101 : none, A102 : co-applicant, A103 : guarantor")
+Ta zmienna mowi o tym czy dany kredytobioraca ma jakies zagwarantowanie kredytu.
+Jezeli tak ma 1 jezeli bierze kredyt wspolnie ma 0 a przy ich braku -1
 
+```{r}
+num_data$other_debtors <- if_else(data$other_debtors %in% c("guarantor"), 1, if_else(data$other_debtors %in% c("co-applicant"), 0,-1))
+```
 
 *other_installment_plans*
 
-TODO (kolumny: other_installment_plans,string,"A141 : bank, A142 : stores, A143 : none")
+Analogicznie
 
+```{r}
+num_data$other_installment_plans <- if_else(data$other_installment_plans %in% c("bank"), 1, if_else(data$other_installment_plans %in% c("stores"), 0,-1))
+```
 
 *housing*
 
-TODO (kolumny: housing,string,"A151 : rent, A152 : own, A153 : for free")
+Analogicznie
+
+```{r}
+num_data$housing <- if_else(data$housing %in% c("rent"), 1, if_else(data$housing %in% c("own"), 0,-1))
+```
 
 
 ## 3.3. Cechy uporządkowane
@@ -127,7 +144,9 @@ TODO
 
 *present_employment* - niech dłuższy staż pracy według zaproponowanych podziałek będzie większą liczbą dla naturalnych > 0.
 
-TODO
+```{r}
+num_data$present_employment <- if_else(data$present_employment %in% c("unemployed"), 0, if_else(data$present_employment %in% c("less_than_year"), 1,if_else(data$present_employment %in% c("1-3_years"), 2,if_else(data$present_employment %in% c("4-6_yeras"), 5,7))))
+```
 
 
 ## 3.4. Zmienne "mieszane"
@@ -155,9 +174,11 @@ num_data$is_single <- if_else( data$personal == "male_single", 1, 0)
 
 ## 3.4.3. *property*
 
-Można z tego wyciągnąć informacji na dwie kolumny
+Można z tego wyciągnąć informacji na dwie kolumny ## COOO? (Marcin)
 
-TODO
+```{r}
+num_data$property <- if_else( data$property == "real_estate", 3, if_else( data$property == "building_savings", 2, if_else( data$property == "car", 1, 0)))
+```
 
 ## 3.4.4. *job*
 
@@ -176,8 +197,15 @@ y <- data$customer_type
 ```
 
 ## 5. Podział na zbiór treningowy i testowy
+```{r}
+set.seed(3113)
+rows <- sample(nrow(num_data))
+num_data <- num_data[rows, ]
 
-TODO
+test_data <- head(num_data,n = 200)
+train_data <- tail(num_data,n = 800)
+```
+
 
 ## 6. Zakończenie
 

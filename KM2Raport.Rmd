@@ -73,6 +73,7 @@ Mamy 21 kolumn, z czego 14 zawiera kategoryczne zmienne tekstowe. Przekształćm
 Cechy *telephone*, *foreign_worker* i *customer_type* przyjmują tylko dwie wartości - te pierwsze dwie yes / no, ta ostatnia - Good / Bad. Sprawa prosta - dobre niech będzie jedynką, a złe - zerem.
 
 ```{r encoding1}
+#to s?? faktory, wi??c as.numeric odczyta warto???? fatora, kt�ry jest numeric, a nie stringa
 # 1 = true, 0 = false
 num_data$has_telephone <- as.numeric(data$telephone) -1
 
@@ -80,13 +81,12 @@ num_data$is_foreign_worker <- as.numeric(data$foreign_worker)
 num_data$is_foreign_worker[ num_data$is_foreign_worker == 2] <- 0
 
 num_data$is_good_customer_type <- as.numeric(data$customer_type)
-num_data$is_good_customer_type[ num_data$customer_type == 2] <- 0
+num_data$is_good_customer_type[ num_data$is_good_customer_type == 2] <- 0
 ```
 ## 3.1.2. *credit_history* - czy osoba sp??aca kredyt brany kredyt
 
 Przetworzymy kolumny na to czy dana dana osoba ma problemy z p??aceniem kredytu, wiersze paid_till_now rozumiemy jako ??e nie by??o wczesniej problemu z p??aceniem kredytu
 
-TODO (kolumny: "all_paid", "all_paid_here", "paid_till_now", "delay", "critical")
 ```{r}
 num_data$has_problems_credit_history <- if_else( data$credit_history %in% c("delay", "critical"), 1, 0)
 ```
@@ -99,12 +99,21 @@ num_data$has_problems_credit_history <- if_else( data$credit_history %in% c("del
 ... czyli te, których nie można jakoś sensownie uporządkować.
 
 Dzieki wiedzy o tym na jaki cel kredytobiorca bierze kredyt mozna sie spodziewac w jakiej sytuacji finansowej jest ta osoba.
-Czesciej bogate osoby biora kredyty na nowy samochod, wakacje czy przebranzowanie.
-Biedne odoby natomiast czesciej biora kredyty na potrzeby domowe jak nowy telewizor lub sprzet domowy
 
 
 ```{r}
-num_data$purpose <- if_else( data$purpose %in% c("new_car", "education", "retraining", "business", "other" ), 1, 0)
+#nie jest to optymalne rozdzielenie, istenieje funkcja 'one_hot' w pakiecie 'mltools', ale wsp�??pracuje ona z pakietem 'data.table' przez co nale??a??oby przepisa?? ca???? nasz?? poprzedni?? prac??. Komentarz ma zaznaczy??, ??e istnieje spos�b na automaczyczne podzielenie danych, ale z niego nie zko??ystali??my z powod�w implementacyjnych
+num_data$purpose_domestic <- if_else( data$purpose == "domestic", 1, 0)
+num_data$purpose_retraining <- if_else( data$purpose == "retraining", 1, 0)
+num_data$purpose_radio_television <- if_else( data$purpose == "radio/television", 1, 0)
+num_data$purpose_new_car <- if_else( data$purpose == "new_car", 1, 0)
+num_data$purpose_used_car <- if_else( data$purpose == "used_car", 1, 0)
+num_data$purpose_business <- if_else( data$purpose == "business", 1, 0)
+num_data$purpose_repairs <- if_else( data$purpose == "repairs", 1, 0)
+num_data$purpose_education <- if_else( data$purpose == "education", 1, 0)
+num_data$purpose_furniture_equipment <- if_else( data$purpose == "furniture/equipment", 1, 0)
+num_data$purpose <- if_else( data$purpose == "new_car", 1, 0)
+#other
 ```
 
 
@@ -112,10 +121,11 @@ num_data$purpose <- if_else( data$purpose %in% c("new_car", "education", "retrai
 *other_debtors*
 
 Ta zmienna mowi o tym czy dany kredytobioraca ma jakies zagwarantowanie kredytu.
-Jezeli tak ma 1 jezeli bierze kredyt wspolnie ma 0 a przy ich braku -1
 
 ```{r}
-num_data$other_debtors <- if_else(data$other_debtors %in% c("guarantor"), 1, if_else(data$other_debtors %in% c("co-applicant"), 0,-1))
+num_data$other_debtors_guarantor <- if_else(data$other_debtors =="guarantor", 1, 0)
+num_data$other_debtors_co_applicant <- if_else(data$other_debtors =="co-applicant", 1, 0)
+#none
 ```
 
 *other_installment_plans*
@@ -123,7 +133,9 @@ num_data$other_debtors <- if_else(data$other_debtors %in% c("guarantor"), 1, if_
 Analogicznie
 
 ```{r}
-num_data$other_installment_plans <- if_else(data$other_installment_plans %in% c("bank"), 1, if_else(data$other_installment_plans %in% c("stores"), 0,-1))
+num_data$other_installment_plans_bank <- if_else( data$other_installment_plans =="bank", 1, 0)
+num_data$other_installment_plans_stores <- if_else( data$other_installment_plans =="stores", 1, 0)
+#none
 ```
 
 *housing*
@@ -131,15 +143,22 @@ num_data$other_installment_plans <- if_else(data$other_installment_plans %in% c(
 Analogicznie
 
 ```{r}
-num_data$housing <- if_else(data$housing %in% c("rent"), 1, if_else(data$housing %in% c("own"), 0,-1))
+num_data$housing_rent <- if_else(data$housing == "rent", 1, 0)
+num_data$housing_own <- if_else(data$housing == "own", 1, 0)
+#for_free
 ```
 
 
-## 3.3. Cechy uporządkowane
+### 3.3. Cechy uporządkowane
 
 *savings* jednoznacznie można uporządkować
 
-TODO
+```{r}
+#0=not_have/unknown 1=low 2=normal 3=high 4=very_high 
+num_data$savings <- as.numeric( data$savings)
+#not_have/unknown
+num_data$savings[ num_data$savings == 5] <- 0
+```
 
 
 *present_employment* - niech dłuższy staż pracy według zaproponowanych podziałek będzie większą liczbą dla naturalnych > 0.
@@ -151,7 +170,7 @@ num_data$present_employment <- if_else(data$present_employment %in% c("unemploye
 
 ## 3.4. Zmienne "mieszane"
 
-## 3.4.1. *checking_account_status*
+### 3.4.1. *checking_account_status*
 
 W przypadku *checking_account_status* mamy właściwie dwie informacje - czy *checking account* jest oraz jak jest - jaki jest jego status. Rozbijmy go na trzy kolumny, czy jest low, fair i high, je????i jest ??adnym z nich to klient go nie ma
 
@@ -161,7 +180,7 @@ num_data$fair_checking_account_status <- if_else( data$checking_account_status =
 num_data$high_checking_account_status <- if_else( data$checking_account_status == 'high', 1, 0)
 ```
 
-## 3.4.2. *personal* czyli płeć i stan cywilny na raz
+### 3.4.2. *personal* czyli płeć i stan cywilny na raz
 
 W zależności od tego czy mamy styczność z mężczyzną i ich stan cywilny. Podzielimy na 2 kolumny: binarne: p??e?? (is_women) (0 - mężczyzna, 1 - kobieta) oraz czy jest singlem (nie by?? nigdy w zwi??zku)
 
@@ -172,19 +191,30 @@ num_data$is_women <- if_else( data$personal == "female_d/s/m", 1, 0)
 num_data$is_single <- if_else( data$personal == "male_single", 1, 0)
 ```
 
-## 3.4.3. *property*
+### 3.4.3. *property*
 
-Można z tego wyciągnąć informacji na dwie kolumny ## COOO? (Marcin)
+Osoby s?? tutaj uporz??dkowane, je??li nie posiadaj?? real_estate, to mog?? posiada?? building_savings, je??li nie to car, ale to nie oznacza, ??e osoby z real_estate nie maj?? car. Dlatego traktujemy t?? kolumn?? jako uporz??dkowanie property, gdzie osoby z real_estate maj?? najwi??cej a not_have/unknown najmiej.
 
 ```{r}
 num_data$property <- if_else( data$property == "real_estate", 3, if_else( data$property == "building_savings", 2, if_else( data$property == "car", 1, 0)))
 ```
 
-## 3.4.4. *job*
+### 3.4.4. *job*
 
-Zrobimy podział skilled / unskilled i unskilled / skilled / highly_qualified (??)
+Zrobimy podział czy osoba posiada prac??
 
-TODO (kolumny: "unskilled_non_resident", "unskilled_resident", "skilled_employee", "highly_qualified_employee*")
+```{r}
+num_data$job_skilled_employee <- if_else( data$job == "skilled_employee", 1,0)
+num_data$job_unskilled_resident <- if_else( data$job == "unskilled_resident", 1,0)
+num_data$job_highly_qualified_employee <- if_else( data$job == "highly_qualified_employee*", 1,0)
+num_data$job_unskilled_non_resident <- if_else( data$job == "unskilled_non_resident", 1,0)
+```
+
+## 3.5
+
+```{r oglad}
+knitr::kable(sample_n(num_data, 20))
+```
 
 ## 4. Klasyfikacja
 

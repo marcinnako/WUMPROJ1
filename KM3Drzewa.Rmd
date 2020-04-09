@@ -1,0 +1,128 @@
+---
+title: 'Wstęp do Uczenia Maszynowego 2020: projekt I, kamień milowy III - drzewa klasyfikacyjne'
+author: "Jakub Kosterna"
+date: "09/04/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Odczyt
+
+W II kamieniu milowym dokonaliśmy porządnej inżynierii cech. Wczytajmy rezultat naszej pracy.
+
+```{r odczy, message = FALSE, warning = FALSE}
+library(dplyr)
+setwd("C:/Users/ckostern/Desktop/Studia/03 rok II semestr/ML/proj1")
+X_train <- read.csv("x_train.csv")
+X_test <- read.csv("x_test.csv")
+y_train <- read.csv("y_train.csv")
+y_test <- read.csv("y_test.csv")
+
+X_test <- select(X_test, -X)
+X_train <- select(X_train, -X)
+y_test <- select(y_test, -X)
+y_train <- select(y_train, -X)
+
+colnames(y_train) <- "is_good_customer_type"
+colnames(y_test) <- "is_good_customer_type"
+
+knitr::kable(sample_n(X_train, 10))
+knitr::kable(sample_n(y_test, 10))
+```
+
+Wszystko jest w porządku! Możemy zacząć implementować nasze drzewo klasyfikacyjne.
+
+# 2. Najprostszy z najprostszych
+
+Żeby trochę ugryźć temat, w pierwszej kolejności zajmę się najbardziej podstawowym wczytaniem i odtworzeniem modelu. Na kolejnych etapach będę próbował bawić się coraz to bardziej zaawansowanymi skrukturami i wyborem hiperparametrów, ale idąc od rdzenia i będziemy mogli zaobserwować ewolucję skomplikowania kodu, ale także i porównań wyniki - czy w praktyce będziemy mieli wyraźnie lepsze rozwiązanie.
+
+Do konstrukcji classification trees użyję przydatnego pakietu **rpart**.
+
+```{r wczytanie_rpart}
+library(rpart)
+```
+
+Wygenerujmy naszą pierwszą roślinkę.
+
+```{r model1_1}
+X <- cbind(X_train, y_train)
+
+primitive_model <- rpart(is_good_customer_type ~ ., data = X, method = "class", control = rpart.control(cp = 0))
+```
+
+... i ją zwizualizujmy. Możemy to zrobić na trzy sposoby:
+
+1. Po prostu wyczytując wartości z powstałej wygenerowanej zmiennej, która zawiera kluczowe przedziały
+2. Użyć podstawowej wizualizacji jaką oferuje **rpart.plot**.
+3. Także skorzystać z pakietu *rpart.plot*, lecz z uładniającymi bonusami.
+
+W pierwszej kolejności skorzystam ze wszystkich trzech opcji - dla kultury.
+
+```{r model1_2, warning = FALSE}
+library(rpart.plot)
+
+primitive_model
+rpart.plot(primitive_model)
+rpart.plot(primitive_model, type = 3, box.palette = c("red", "green"), fallen.leaves = TRUE)
+```
+
+Woah! Jak widać dużo cech poskutkowało także niewytłumaczalnym banalnie classification tree.
+
+Sprawdźmy jeszcze jak sobie ono radzi w akcji.
+
+```{r model1_3}
+y_pred <- predict(primitive_model, X_test, type = "class")
+y_pred <- as.data.frame(y_pred)
+
+mean(y_pred == y_test)
+mean(y_test == 1)
+```
+
+77% wartości zostało dobrze zaklysyfikowanych.
+
+Wynik niby dobry, ale gdybyśmy założyli, że każdy klient jest zdolny kredytowo, to otrzymalibyśmy 68.5% poprawności.
+
+# 3. Drzewa z ustawionymi maksymalnymi poziomami wysokości
+
+Może warto ograniczyć wysokość drzewa? Sprawdźmy to!
+
+```{r model2_1, message = FALSE, warning = FALSE}
+indexes <- 1:30
+with_max_depths_models <- list()
+y_preds <- list()
+means <- list()
+
+for (i in indexes){
+  with_max_depths_model <- rpart(is_good_customer_type ~ ., data = X, method = "class", control = rpart.control(cp = 0, maxdepth = i))
+  with_max_depths_models[[i]] <- with_max_depths_model
+  y_preds[[i]] <- predict(with_max_depths_model, X_test, type = "class")
+  means[[i]] <- mean(y_preds[i] == y_test)
+}
+
+means <- unlist(means)
+means
+
+means <- data.frame(1:30, means)
+library(ggplot2)
+ggplot(means, aes(x = X1.30, y = means)) +
+  geom_area() +
+  theme_bw()
+max(means$means)
+```
+
+Ograniczenie głębokości jak można się było spodziewać nie przyniosło efektów - od 11 poziomów w górę stale otrzymywaliśmy tę samą głębokość.
+
+# 4. Las losowy
+
+```{r model3_1, message = FALSE, warning = FALSE}
+library(randomForest)
+
+X$is_good_customer_type <- as.factor(X$is_good_customer_type)
+random_forest <- randomForest(is_good_customer_type ~ ., data = X, proximity=T)
+
+y_pred_forest <- predict(random_forest, X_test, method = "class")
+mean(as.data.frame(y_pred_forest) == y_test)
+```

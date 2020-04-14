@@ -27,7 +27,7 @@ acc <- rep(0,n)
 for(k in 1:n){
 test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=k)
 
-tab <-  table( test_pred, y_test[,1])
+tab <-  table( y_test[,1], test_pred)
 acc[k] <- accuracy(tab)
 }
 k=1:n
@@ -36,7 +36,7 @@ plot( k, acc, type = "l")
 best_k <- which.max( acc)
 
 test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=best_k)
-tab <-  table( test_pred, y_test[,1])
+tab <-  table( y_test[,1], test_pred)
 
 accuracy( tab)
 tab

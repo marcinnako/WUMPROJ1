@@ -33,7 +33,10 @@ acc[k] <- accuracy(tab)
 k=1:n
 plot( k, acc, type = "l")
 
-#k=11
-test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=11)
+best_k <- which.max( acc)
+
+test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=best_k)
 tab <-  table( test_pred, y_test[,1])
+
+accuracy( tab)
 tab

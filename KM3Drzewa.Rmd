@@ -35,13 +35,54 @@ knitr::kable(sample_n(y_test, 10))
 
 Wszystko jest w porządku! Możemy zacząć implementować nasze drzewo klasyfikacyjne.
 
-# 2. Najprostszy z najprostszych
+# 2. Miary oceny klasyfikatora
+
+W ocenie kolejnych modeli posłużę się czterema najbardziej klasycznymi miarami:
+
+* *accuracy* - $\frac{TP+TN}{TP+FP+FN+TN}$
+* *precision* - $\frac{TP}{TP+FP}$
+* *recall* - $\frac{TP}{TP+FN}$
+* *f1* - $2*\frac{Recall * Precision}{Recall + Precision}$
+
+```{r metrics_functions}
+confusion_matrix_values <- function(confusion_matrix){
+  TP <- confusion_matrix[2,2]
+  TN <- confusion_matrix[1,1]
+  FP <- confusion_matrix[1,2]
+  FN <- confusion_matrix[2,1]
+  return (c(TP, TN, FP, FN))
+}
+
+accuracy <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  return((conf_matrix[1] + conf_matrix[2]) / (conf_matrix[1] + conf_matrix[2] + conf_matrix[3] + conf_matrix[4]))
+}
+
+precision <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  return(conf_matrix[1]/ (conf_matrix[1] + conf_matrix[3]))
+}
+
+recall <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  return(conf_matrix[1] / (conf_matrix[1] + conf_matrix[4]))
+}
+
+f1 <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  rec <- recall(confusion_matrix)
+  prec <- precision(confusion_matrix)
+  return(2 * (rec * prec) / (rec + prec))
+}
+```
+
+# 3. Najprostszy z najprostszych
 
 Żeby trochę ugryźć temat, w pierwszej kolejności zajmę się najbardziej podstawowym wczytaniem i odtworzeniem modelu. Na kolejnych etapach będę próbował bawić się coraz to bardziej zaawansowanymi skrukturami i wyborem hiperparametrów, ale idąc od rdzenia i będziemy mogli zaobserwować ewolucję skomplikowania kodu, ale także i porównań wyniki - czy w praktyce będziemy mieli wyraźnie lepsze rozwiązanie.
 
 Do konstrukcji classification trees użyję przydatnego pakietu **rpart**.
 
-```{r wczytanie_rpart}
+```{r wczytanie_rpart, warning = FALSE}
 library(rpart)
 ```
 
@@ -77,45 +118,103 @@ Sprawdźmy jeszcze jak sobie ono radzi w akcji.
 y_pred <- predict(primitive_model, X_test, type = "class")
 y_pred <- as.data.frame(y_pred)
 
-mean(y_pred == y_test)
-mean(y_test == 1)
+confusion_matrix_primitive <- table(Truth = y_test$is_good_customer_type, Prediction = y_pred$y_pred)
+
+knitr::kable(confusion_matrix_primitive)
+
+accuracy_primitive <- accuracy(confusion_matrix_primitive)
+precision_primitive <- precision(confusion_matrix_primitive)
+recall_primitive <- recall(confusion_matrix_primitive)
+f1_primitive <- f1(confusion_matrix_primitive)
+
+classification_report_primitive <- data.frame(accuracy_primitive, precision_primitive,
+                                              recall_primitive, f1_primitive)
+colnames(classification_report_primitive) <- c("accuracy", "precision",
+                                               "recall", "f1")
+knitr::kable(classification_report_primitive)
 ```
 
-77% wartości zostało dobrze zaklysyfikowanych.
+Jakby nie patrzeć całkiem satysfakcjonujące wyniki.
 
-Wynik niby dobry, ale gdybyśmy założyli, że każdy klient jest zdolny kredytowo, to otrzymalibyśmy 68.5% poprawności.
-
-# 3. Drzewa z ustawionymi maksymalnymi poziomami wysokości
+# 4. Drzewa z ustawionymi maksymalnymi poziomami wysokości
 
 Może warto ograniczyć wysokość drzewa? Sprawdźmy to!
+
+Za najlepszą miarę uznam **f1** i myślę, że jest to dobry krok - łączymy w jedno wszystkie cztery przypadki TP, FP, TN, FN i dla balansu takiego jak w naszej ramce powinniśmy otrzymać satysfakcjonujący rezultat.
 
 ```{r model2_1, message = FALSE, warning = FALSE}
 indexes <- 1:30
 with_max_depths_models <- list()
 y_preds <- list()
-means <- list()
+acccuracy_scores <- list()
+precision_scores <- list()
+recall_scores <- list()
+f1_scores <- list()
 
 for (i in indexes){
   with_max_depths_model <- rpart(is_good_customer_type ~ ., data = X, method = "class", control = rpart.control(cp = 0, maxdepth = i))
   with_max_depths_models[[i]] <- with_max_depths_model
   y_preds[[i]] <- predict(with_max_depths_model, X_test, type = "class")
-  means[[i]] <- mean(y_preds[i] == y_test)
+  confusion_matrix <- table(Truth = y_test$is_good_customer_type, Prediction = y_preds[[i]])
+  
+  acccuracy_scores[[i]] <- accuracy(confusion_matrix)
+  precision_scores[[i]] <- precision(confusion_matrix)
+  recall_scores[[i]] <- recall(confusion_matrix)
+  f1_scores[[i]] <- f1(confusion_matrix)
 }
 
-means <- unlist(means)
-means
+acccuracy_scores <- unlist(acccuracy_scores)
+precision_scores <- unlist(precision_scores)
+recall_scores <- unlist(recall_scores)
+f1_scores <- unlist(f1_scores)
 
-means <- data.frame(1:30, means)
+measures <- data.frame(1:30, acccuracy_scores, precision_scores, recall_scores, f1_scores)
+
 library(ggplot2)
-ggplot(means, aes(x = X1.30, y = means)) +
-  geom_area() +
-  theme_bw()
-max(means$means)
+ggplot(measures, aes(x = X1.30)) +
+  geom_line(aes(y = acccuracy_scores), color = "yellow") + 
+  geom_line(aes(y = precision_scores), color = "blue") + 
+  geom_line(aes(y = recall_scores), color = "green") + 
+  geom_line(aes(y = f1_scores), color = "red") + 
+  theme_bw() +
+  xlab("max depth number") +
+  ylab("result of measures") +
+  ylim(c(0, 1)) +
+  ggtitle("Measures of classification tree by max depth")
 ```
 
-Ograniczenie głębokości jak można się było spodziewać nie przyniosło efektów - od 11 poziomów w górę stale otrzymywaliśmy tę samą głębokość.
+Co możemy stwierdzić po wykresie?
 
-# 4. Las losowy
+1) od głębokości 11 w górę wynik jest zawsze taki sam - czyli nie generują się już sensowniejsze głębsze drzewa
+2) mając kilka miar ciężko jednoznacznie stwierdzić, która jest najlepsza - jak dla mnie jednak będzie to ta **dla parametru 6** - chyba najważniejsza miara biorąc pod uwagę nasz zbiór *f1* przyjmuje maksymalną wartość, tak samo *accuracy*, *recall* jest lepsze niż dla dwóch sąsiadujących wartości i *precision* również niczego sobie. No i wiadomo, prostota na plus!
+
+```{r model2_2}
+maxd6_model <- rpart(is_good_customer_type ~ ., data = X, method = "class", control = rpart.control(cp = 0, maxdepth = 6))
+
+rpart.plot(maxd6_model, type = 3, box.palette = c("red", "green"), fallen.leaves = TRUE)
+
+y_pred <- predict(maxd6_model, X_test, type = "class")
+y_pred <- as.data.frame(y_pred)
+
+confusion_matrix_maxd6 <- table(Truth = y_test$is_good_customer_type, Prediction = y_pred$y_pred)
+
+knitr::kable(confusion_matrix_maxd6)
+
+accuracy_maxd6 <- accuracy(confusion_matrix_maxd6)
+precision_maxd6 <- precision(confusion_matrix_maxd6)
+recall_maxd6 <- recall(confusion_matrix_maxd6)
+f1_maxd6 <- f1(confusion_matrix_maxd6)
+
+classification_report_maxd6 <- data.frame(accuracy_maxd6, precision_maxd6,
+                                              recall_maxd6, f1_maxd6)
+colnames(classification_report_maxd6) <- c("accuracy", "precision",
+                                               "recall", "f1")
+knitr::kable(classification_report_maxd6)
+```
+
+I już mamy miary fajniejsze!
+
+# 5. Las losowy
 
 ```{r model3_1, message = FALSE, warning = FALSE}
 library(randomForest)
@@ -124,5 +223,41 @@ X$is_good_customer_type <- as.factor(X$is_good_customer_type)
 random_forest <- randomForest(is_good_customer_type ~ ., data = X, proximity=T)
 
 y_pred_forest <- predict(random_forest, X_test, method = "class")
-mean(as.data.frame(y_pred_forest) == y_test)
+
+confusion_matrix_forest <- table(Truth = y_test$is_good_customer_type, Prediction = y_pred_forest)
+
+knitr::kable(confusion_matrix_forest)
+
+accuracy_forest <- accuracy(confusion_matrix_forest)
+precision_forest <- precision(confusion_matrix_forest)
+recall_forest <- recall(confusion_matrix_forest)
+f1_forest <- f1(confusion_matrix_forest)
+
+classification_report_forest <- data.frame(accuracy_forest, precision_forest,
+                                              recall_forest, f1_forest)
+colnames(classification_report_forest) <- c("accuracy", "precision",
+                                               "recall", "f1")
+knitr::kable(classification_report_forest)
 ```
+
+# 6. Podsumowanie i najlepszy model
+
+Porównajmy nasze miary.
+
+```{r podsumowanie}
+comparison_frame <- data.frame(rbind(classification_report_primitive, classification_report_maxd6, classification_report_forest))
+comparison_frame <- cbind(model = c("primitive", "max depth: 6", "random forest"), comparison_frame)
+comparison_frame
+```
+
+Sprawa wyboru najlepszego modelu nie jest taka prosta - biorąc pod uwagę **recall**, zdecydowanie najlepiej wypada *random forest* i także dla **f1** jest całkiem całkiem (choć tam bardzo małe różnice). Model ten radzi sobie jednak najgorzej w przypadku **precision**, gdzie dominuje ten, w której głębokość drzewa ograniczamy do 6. Ten sam model radzi sobie też najlepiej w przypadku **accuracy**, choć nie odstaje od swoich kolegów.
+
+Na pewno **najgorzej wypadł model prymitywny**. Biorąc pod uwagę logikę biznesową i problem, uważam jednak **max depth = 6** za najlepszy - *precision* jest o tyle istotne, że nie chcemy dać zdolności kredytowej klientowi, który może zawalić i sprawić problemy. Niedanie pożyczki osobie, która prawdopodobnie nie zrobiłaby nic złego to potencjalnie mniejsza szkoda dla firmy.
+
+Przyjrzjymy się jeszcze raz naszemu najlepszemu drzewku.
+
+```{r wizualizacja_najlepszego}
+rpart.plot(maxd6_model, type = 3, box.palette = c("red", "green"), fallen.leaves = TRUE)
+```
+
+Dodatkowym walorem modelu jest fakt, że jest dość prrosty i łatwo wytłumaczalny - prosto możemy przekazać, kto nie dostanie pożyczki.

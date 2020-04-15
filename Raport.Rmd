@@ -1,0 +1,145 @@
+---
+title: "Raport"
+author: "Jakub Kosterna, Marcin Łukaszyk, Mikołaj Malec"
+date: "15 kwietnia 2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Ogólnie
+
+**German credit data** to bardzo ładny zbiór danych pod naukę uczenia maszynowego. Jest on względnie nieduży, gdyż zawiera 1000-czną próbkę osób ubiegających się o kredyt, jednak jest przy tym wydaje się reprezentatywny (dane zdają się dobrze odzwierciedlać populację) i zawiera dużo informacji na temat każdego klienta.
+
+W ciągu ostatnich tygodni pierwszorzędnie dobrze zapoznaliśmy się z daną ramką danych, następnie przygotowaliśmy ją pod odpalania algorytmów machine learning, żeby na końcu wybrać ten jeden fajny model i go przetestować.
+
+# 2. Czyszczenie
+
+Pierwotna wersja data frame nie była najweselsza na świecie - zamiast ludzkich liczb czy jasnych wartości typu faktor, mieliśmy do czynienia z chaosem w postaci **dziwnych oznaczeń** takich jak widać na załączonym obrazku:
+
+![](grafika/01WstepnaTabela.png)
+
+Z pomocą przyszła **dokumentacja**, która rozwiała wszelkie możliwości. W celu dalszej pracy z naszymi danymi, podmieniliśmy skrótowe identyfikatory na ciągi znaków przyjazne użytkownikowi.
+
+![](grafika/02PierwszeCzyszczenie.png)
+
+Końcowy efekt zaprezentował się następująco:
+
+![](grafika/03TabelaPoPierwszymCzyszczeniu.png)
+
+Wielkim szczęściem okazał się za to fakt, że nasza ramka danych **nie zawierała braków ani niepokojących outlierów**.
+
+# 3. Eksploracja
+
+... dla tak przyjemnych i życiowych danych była czystą przyjemnością.
+
+Bardzo pomocny okazało się narzędzie **DataExplorer**, które pokazało wiele ciekawych zależności w tabeli automatycznie.
+
+**<TU SCREENY TRZA WRZUCIĆ>**
+
+Oprócz tego postanowiliśmy sami przyjrzeć się wybranym cechom.
+
+Okazało się między innymi, że stereotypy można wyrzucić do kosza - mężczyźni o wiele częściej biorą kredyt ze względu na potrzebę funduszy na gospodarstwo domowe i nie widać znaczącej przewagi w stosunku do kobiet jeśli idzie o chęć postawienia pieniędzy na auto.
+
+Bez zaskoczeń o wiele częściej na dom stawiają mężczyźni po ślubie niż ci samotni czy rozwodnicy. Co ciekawe ci sami ani razu nie wzięli pożyczki na wyposażenie / meble [przynajmniej na te 1000 osobników], zaś rozwodnicy i separatyści… przeciwnie do pozostałych grup nie myślą tu wręcz wcale o dodatkowej mamonie na biznes.
+
+![](grafika/04PurpuseByMaritialStatus.png)
+
+Wychodzi również na to, że generalnie większym zaufaniem firma daży osoby starsze:
+
+![](grafika/05CustomerTypeByAge.png)
+
+Wyciągnęliśmy także wnioski na podstawie płci, wieku i stanu cywilnego.
+
+![](grafika/06CustomerTypeBySexMartialStatus.png)
+
+Dane mówią, że:
+
+1. Najmniej ufamy rozwiedzionym facetom - zwłaszcza tym po 30, im zwykle nie dajemy.
+2. Najbezpieczniejsi za to są też faceci po 30… ale single.
+3. Żonaci to też dobre ziomki.
+4. Kobiety są gorsze od mężczyzn, ale tylko przed 40. Potem raczej spokój, za wyjątkiem 70-tki psującej obraz.
+
+Jak można się było spodziewać, pożyczka chętniej jest także udzielana na krótszy okres czasu.
+
+![](grafika/07CustomerTypeByDuration.png)
+
+# 4. Kodowanie
+
+W ramach drugiego kamienia milowego dokonaliśmy szczegółowej analizy pod względem sensownego encodingu i **każdej kolumnie przyjrzeliśmy się pod lupą**.
+
+Spośród 21 kolumn, aż 14 okazało się być tekstowymi.
+
+Do czynienia mieliśmy z problemami:
+
+1. Prostych zmiennych binarnych
+2. Kolumn nominalnych
+3. Cech uporządkowanych
+
+![](grafika/08ZarobkiStazPracyWSkalach.png)
+
+4. Zmiennych mieszanych - zawierających w sobie po parę ciekawych informacji
+
+![](grafika/09Kodowanie.png)
+
+Końcowy efekt wyszedł encodingu wyszedł następujący:
+
+![](grafika/10KoncowyWynik.png)
+
+Tutaj kolory odpowiadające miarom:
+
+* żółty - *accuracy*
+* niebieski - *precision*
+* zielony - *recall*
+* czerwony - *f1*
+
+# 5. Poszukiwanie najlepszego modelu - dyskusja
+
+W celu wybrania tego jednego właściwego modelu, wpierw postanowiliśmy podzielić się popularnymi znanymi już przez nas metodami i indywidualne zajęcie się nimi. Oto tego efekty:
+
+**TODO**
+
+## 5.1. Drzewo klasyfikacyjny i las losowy
+
+Ku porównaniu efektów modeli postanowiliśmy porównywać cztery chyba najbardziej podstawowe w tej kwestii, ale i przy tym dające ogrom informacji miary: **accuracy**, **precision**, **recall** i **f1**.
+
+![](grafika/11MiaryOcenaKlasyfikatora.png)
+
+Uruchomienie algorytmu z pakietu *rpart* dało mało satysfakcjonujący wynik w myśli o logice biznesowej.
+
+![](grafika/12DrzewkoPrymitywne.png)
+
+W celu znalezienia najlepszych hiperparametrów, porównywaliśmy między innymi miary dla kolejnych maksymalnie narzuconych głębokości drzewa.
+
+![](grafika/13SzukanieDobregoHyperparametruDrzewko.png)
+
+**TODO**
+
+**FOTY**
+
+## 5.2. k najbliższych sąsiadów
+
+**TODO**
+
+**FOTY**
+
+## 5.3. Regresja liniowa
+
+**TODO**
+
+**FOTY**
+
+# 6. Wybór najlepszego algorytmu uczenia maszynowego i implementacja
+
+**TODO**
+
+# 7. Zakończenie
+
+To by było na tyle.
+
+Mamy nadzieję, że się podobało; ja myślę, że fajna robota (dopowiedź: Kuba).
+```{r session_info}
+sessionInfo()
+```

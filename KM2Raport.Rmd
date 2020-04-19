@@ -1,6 +1,6 @@
 ---
-title: 'Wstêp do Uczenia Maszynowego 2020: projekt I [kamieñ milowy II]'
-author: "Jakub Kosterna, Marcin £ukaszyk, Miko³aj Malec"
+title: 'Wst?p do Uczenia Maszynowego 2020: projekt I [kamie? milowy II]'
+author: "Jakub Kosterna, Marcin ?ukaszyk, Miko?aj Malec"
 date: "16/03/2020"
 output: html_document
 ---
@@ -11,9 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 1. Wstep
 
-Wpierw wczytajmy postêpy, które zrobiliœmy na pierwszym kamieniu milowym. Oprócz wczytania ramki danych i jej eksploracji, obrobiliœmy je tak¿e w celu uzyskania bardziej przystêpnej formy - miêdzy innymi nadaj¹c kolumnom "sensowne" nazwy.
+Wpierw wczytajmy post?py, kt?re zrobili?my na pierwszym kamieniu milowym. Opr?cz wczytania ramki danych i jej eksploracji, obrobili?my je tak?e w celu uzyskania bardziej przyst?pnej formy - mi?dzy innymi nadaj?c kolumnom "sensowne" nazwy.
 
-Wczytajmy potrzebne pakiety i przypomnijmy sobie jak wygl¹da³a nasza ramka danych.
+Wczytajmy potrzebne pakiety i przypomnijmy sobie jak wygl?da?a nasza ramka danych.
 
 ```{r pakiety, message = FALSE, warning = FALSE}
 # install.packages("dplyr") # if not installed
@@ -48,17 +48,17 @@ levels(data[,21]) <- c("Good", "Bad")
 knitr::kable(sample_n(data, 20))
 ```
 
-## 2. Czyszczenie - braki, niepoprawne wartoœci i kluczowe kolumny
+## 2. Czyszczenie - braki, niepoprawne warto?ci i kluczowe kolumny
 
-Takiego mamy farta, ¿e do czego doszliœmy na pierwszym kamieniu milowym, nie mamy **¿adnych braków danych**. Czy wszystkie wartoœci sa jednak poprawne?
+Takiego mamy farta, ?e do czego doszli?my na pierwszym kamieniu milowym, nie mamy **?adnych brak?w danych**. Czy wszystkie warto?ci sa jednak poprawne?
 
-Jak wynika z histogramów naszego raportu wygenerowanego dziêki *DataExplorer*, **w przypadku danych kategorycznych wszystkie mamy w wersji poprawnej** - nie ma ani wartoœci dos³ownie jedno-lub parukrotnych sugeruj¹cych b³¹d czy te¿ literówek.
+Jak wynika z histogram?w naszego raportu wygenerowanego dzi?ki *DataExplorer*, **w przypadku danych kategorycznych wszystkie mamy w wersji poprawnej** - nie ma ani warto?ci dos?ownie jedno-lub parukrotnych sugeruj?cych b??d czy te? liter?wek.
 
-**Patrz¹c na zmienne liczbowe, tak¿e wszystko jest na swoim miejscu** - wiek zawiera siê w przedziale <nieca³e 20; mniej ni¿ 100>, wartoœci kredytu to do 20 000 Euro, klient bierze co najwy¿ej 4 ró¿ne pozyczki i ogólnie mamy tu ³ad i sk³ad.
+**Patrz?c na zmienne liczbowe, tak?e wszystko jest na swoim miejscu** - wiek zawiera si? w przedziale <nieca?e 20; mniej ni? 100>, warto?ci kredytu to do 20 000 Euro, klient bierze co najwy?ej 4 r??ne pozyczki i og?lnie mamy tu ?ad i sk?ad.
 
-Podsumowuj¹c **nie ma ani outlierów wymagaj¹cych usuniêcia, ani wartoœci niezgodnych**.
+Podsumowuj?c **nie ma ani outlier?w wymagaj?cych usuni?cia, ani warto?ci niezgodnych**.
 
-Na ch³opski rozum ka¿dy atrybut mo¿e byæ istotny w kwestii oszacowania, czy ryzykujemy z daniem klientowi kredytu.
+Na ch?opski rozum ka?dy atrybut mo?e by? istotny w kwestii oszacowania, czy ryzykujemy z daniem klientowi kredytu.
 
 ## 3. Encoding
 
@@ -68,15 +68,15 @@ Mamy 21 kolumn, z czego 14 zawiera kategoryczne zmienne tekstowe. Te liczbowe za
 num_data <- data[, c(2,5,8,11,13,16,18)]
 ```
 
-... a nastêpnie uzupe³nijmy j¹ równie¿ wartoœciami liczbowymi powsta³ymi przez encoding kolumn typu *factor*.
+... a nast?pnie uzupe?nijmy j? r?wnie? warto?ciami liczbowymi powsta?ymi przez encoding kolumn typu *factor*.
 
 ## 3.1. Prosty problem zmiennych binarnych
 
-### 3.1.1. Prawda / fa³sz niemal¿e jawne
+### 3.1.1. Prawda / fa?sz niemal?e jawne
 
-Cechy *telephone*, *foreign_worker* i *customer_type* przyjmuj¹ tylko dwie wartoœci - te pierwsze dwie yes / no, ta ostatnia - Good / Bad. Sprawa prosta - dobre niech bedzie jedynk¹, a z³e - zerem.
+Cechy *telephone*, *foreign_worker* i *customer_type* przyjmuj? tylko dwie warto?ci - te pierwsze dwie yes / no, ta ostatnia - Good / Bad. Sprawa prosta - dobre niech bedzie jedynk?, a z?e - zerem.
 
-Mamy tu stycznoœæ z faktorami, wiêc *as.numeric()* odczyta wartoœæ *factora*, który jest typu *numeric* - a nie stringa. Przyjmijmy standardow¹ form¹ *1 == true*, *0 == false*.
+Mamy tu styczno?? z faktorami, wi?c *as.numeric()* odczyta warto?? *factora*, kt?ry jest typu *numeric* - a nie stringa. Przyjmijmy standardow? form? *1 == true*, *0 == false*.
 
 ```{r encoding1}
 num_data$has_telephone <- as.numeric(data$telephone) -1
@@ -88,9 +88,9 @@ num_data$is_good_customer_type <- as.numeric(data$customer_type)
 num_data$is_good_customer_type[num_data$is_good_customer_type == 2] <- 0
 ```
 
-### 3.1.2. Czy klient póki co by³ grzeczny?
+### 3.1.2. Czy klient p?ki co by? grzeczny?
 
-Przyjrzyjmy siê kolumnie *credit_history*. Mamy w niej istotn¹ informacjê o tym **czy dana osoba mia³a dotychczas problemy z p³aceniem kredytu**. £atwo podzieliæ osoby z wartoœci¹ *delay* [opóŸnienie] i *critical* [zaci¹gniêcie kredytów w innych bankach] jako komplikacjê, zaœ pozosta³e trzy - jako "bezproblemowoœæ".
+Przyjrzyjmy si? kolumnie *credit_history*. Mamy w niej istotn? informacj? o tym **czy dana osoba mia?a dotychczas problemy z p?aceniem kredytu**. ?atwo podzieli? osoby z warto?ci? *delay* [op??nienie] i *critical* [zaci?gni?cie kredyt?w w innych bankach] jako komplikacj?, za? pozosta?e trzy - jako "bezproblemowo??".
 
 W dokumentacji czytamy bowiem:
 
@@ -102,11 +102,11 @@ num_data$has_problems_credit_history <- if_else( data$credit_history %in% c("del
 
 ## 3.2. Kolumny nominalne
 
-... czyli te, których nie mozna jakoœ sensownie uporzadkowaæ. Poniewa¿ jest ma³o kategorii bêdziemy stosowaæ metodê **One-Hot Encoding**.
+... czyli te, kt?rych nie mozna jako? sensownie uporzadkowa?. Poniewa? jest ma?o kategorii b?dziemy stosowa? metod? **One-Hot Encoding**.
 
-### 3.2.1. Po co ci te pieni¹dze?
+### 3.2.1. Po co ci te pieni?dze?
 
-*purpose* daje nam wiedza o tym na jaki cel kredytobiorca bierze po¿yczkê.
+*purpose* daje nam wiedza o tym na jaki cel kredytobiorca bierze po?yczk?.
 
 ```{r}
 num_data$purpose_domestic <- if_else(data$purpose == "domestic", 1, 0)
@@ -121,13 +121,13 @@ num_data$purpose_furniture_equipment <- if_else(data$purpose == "furniture/equip
 # other
 ```
 
-Kodowanie jest poprawne, ale warto podkreœliæ, ¿e nie jest to optymalne rozdzielenie - istnieje bowiem funkcja *one_hot()* w pakiecie *mltools*, ale wspó³pracuje ona z pakietem *data.table* przez co nale¿a³oby przepisaæ cala nasza poprzedni¹ pracê. Istnieje sposób na automatyczne podzielenie danych, ale w naszym wypadku nie ma co z niego korzystaæ z powodów implementacyjnych.
+Kodowanie jest poprawne, ale warto podkre?li?, ?e nie jest to optymalne rozdzielenie - istnieje bowiem funkcja *one_hot()* w pakiecie *mltools*, ale wsp??pracuje ona z pakietem *data.table* przez co nale?a?oby przepisa? cala nasza poprzedni? prac?. Istnieje spos?b na automatyczne podzielenie danych, ale w naszym wypadku nie ma co z niego korzysta? z powod?w implementacyjnych.
 
-Dla **jeszcze lepszego encodingu mo¿naby siê jeszcze zastanowiæ nad dodatkowym pogrupowaniem kategorii** - na przyk³ad zarówno *new_car* jak i *used_car* dotycz¹... samochodu. Ewentualnie mo¿na by te dwie kolumny zlepiæ w jedn¹, ale by³aby to jednak ju¿ jednoznaczna utrata danych.
+Dla **jeszcze lepszego encodingu mo?naby si? jeszcze zastanowi? nad dodatkowym pogrupowaniem kategorii** - na przyk?ad zar?wno *new_car* jak i *used_car* dotycz?... samochodu. Ewentualnie mo?na by te dwie kolumny zlepi? w jedn?, ale by?aby to jednak ju? jednoznaczna utrata danych.
 
 ### 3.2.2. Gwarancja kredytobiorcy
 
-Istotn¹ informacjê zawiera tak¿e *other_debtors* - mo¿emy z niej odczytaæ czy dany kredytobiorca ma jakieœ zagwarantowanie kredytu. W absolutnej wiêkszoœci przypadków nie ma tej w³aœciwoœci (wartoœæ *none*), ale niektórzy mog¹ pochwaliæ siê rêczycielem (*guarantor*) czy wspó³wnioskodawc¹ (*co-applicant*). Stwórzmy po binarnej kolumnie dla tych dwóch ostatnich.
+Istotn? informacj? zawiera tak?e *other_debtors* - mo?emy z niej odczyta? czy dany kredytobiorca ma jakie? zagwarantowanie kredytu. W absolutnej wi?kszo?ci przypadk?w nie ma tej w?a?ciwo?ci (warto?? *none*), ale niekt?rzy mog? pochwali? si? r?czycielem (*guarantor*) czy wsp??wnioskodawc? (*co-applicant*). Stw?rzmy po binarnej kolumnie dla tych dw?ch ostatnich.
 
 ```{r}
 num_data$other_debtors_guarantor <- if_else(data$other_debtors =="guarantor", 1, 0)
@@ -136,7 +136,7 @@ num_data$other_debtors_co_applicant <- if_else(data$other_debtors =="co-applican
 
 ### 3.2.3. Inne plany ratalne
 
-... czyli *other_installment_plans* - zrobimy znowu z pomoc¹ *one-encoding*. Sytuacja analogiczna jak wy¿ej.
+... czyli *other_installment_plans* - zrobimy znowu z pomoc? *one-encoding*. Sytuacja analogiczna jak wy?ej.
 
 ```{r}
 num_data$other_installment_plans_bank <- if_else(data$other_installment_plans == "bank", 1, 0)
@@ -146,7 +146,7 @@ num_data$other_installment_plans_stores <- if_else(data$other_installment_plans 
 
 ### 3.2.4. Zamieszkanie
 
-Klient mieszkanie wynaj¹³, ma na w³asnoœæ czy ¿yje u kogoœ za darmochê?
+Klient mieszkanie wynaj??, ma na w?asno?? czy ?yje u kogo? za darmoch??
 
 ```{r}
 num_data$housing_rent <- if_else(data$housing == "rent", 1, 0)
@@ -154,9 +154,9 @@ num_data$housing_own <- if_else(data$housing == "own", 1, 0)
 # for_free
 ```
 
-### 3.2.5. Rodzaje stanowisk w pracy i ich [chyba] nieporównywalnoœæ
+### 3.2.5. Rodzaje stanowisk w pracy i ich [chyba] niepor?wnywalno??
 
-Mo¿na by pomyœleæ o pogrupowaniu na dwie kolumny - w zale¿noœci od statusu pracownik / resident i poziomu wykwalifikowania... ale kategorie *A171 : unemployed/ unskilled - non-resident,A172 : unskilled - resident,A173 : skilled employee / official,A174 : management/ self-employed/highly qualified employee/ officer* s¹ jednak na to zbyt ogólne i roz³¹czne.
+Mo?na by pomy?le? o pogrupowaniu na dwie kolumny - w zale?no?ci od statusu pracownik / resident i poziomu wykwalifikowania... ale kategorie *A171 : unemployed/ unskilled - non-resident,A172 : unskilled - resident,A173 : skilled employee / official,A174 : management/ self-employed/highly qualified employee/ officer* s? jednak na to zbyt og?lne i roz??czne.
 
 ```{r}
 num_data$job_skilled_employee <- if_else( data$job == "skilled_employee", 1,0)
@@ -165,17 +165,17 @@ num_data$job_highly_qualified_employee <- if_else( data$job == "highly_qualified
 # unskilled_non_resident
 ```
 
-No kontrowersyjna sprawa czy nie podci¹gnê³o by siê tego pod problemy opisywane w nastêpnym podrozdziale.
+No kontrowersyjna sprawa czy nie podci?gn??o by si? tego pod problemy opisywane w nast?pnym podrozdziale.
 
-## 3.3. Cechy uporz¹dkowane
+## 3.3. Cechy uporz?dkowane
 
 ### 3.3.1. Zarobki w skali 0-4
 
-... oczywiœcie jednoznacznie mozna uporz¹dkowaæ.
+... oczywi?cie jednoznacznie mozna uporz?dkowa?.
 
-Do jednej kupy zosta³ wsadzony brak zarobków i brak informacji na ich temat - rozs¹dnie bêdzie obu przydzieliæ 0, gdy¿ mo¿na siê spodziewaæ, ¿e tak istotna informacja raczej nie by³oby zatajana przez osobê ubiegaj¹c¹ siê o po¿yczkê i realistycznie jest ona raczej w grupie *low* (przynajmniej wed³ug mnie - przypowiedŸ Kuba).
+Do jednej kupy zosta? wsadzony brak zarobk?w i brak informacji na ich temat - rozs?dnie b?dzie obu przydzieli? 0, gdy? mo?na si? spodziewa?, ?e tak istotna informacja raczej nie by?oby zatajana przez osob? ubiegaj?c? si? o po?yczk? i realistycznie jest ona raczej w grupie *low* (przynajmniej wed?ug mnie - przypowied? Kuba).
 
-Wobec tego kolejne numery bêd¹ mia³y takie dopasowanie:
+Wobec tego kolejne numery b?d? mia?y takie dopasowanie:
 
 * not_have/unknown --> 0
 * low --> 1
@@ -188,9 +188,9 @@ num_data$savings <- as.numeric(data$savings)
 num_data$savings[num_data$savings == 5] <- 0 # not_have/unknown
 ```
 
-### 3.3.2. Sta¿ pracy w przybli¿onych liczbach
+### 3.3.2. Sta? pracy w przybli?onych liczbach
 
-Kolumna *present_employment* daje nam ³adne pogrupowanie d³ugoœci pracy w formie grup *unemployed*, *less_than_year*, *1-3_years*, *4-6_years* i *more*. Zamienimy dane kategoryczne na liczbê oznaczaj¹c¹ oczekiwany sta¿ pracy jak ni¿ej:
+Kolumna *present_employment* daje nam ?adne pogrupowanie d?ugo?ci pracy w formie grup *unemployed*, *less_than_year*, *1-3_years*, *4-6_years* i *more*. Zamienimy dane kategoryczne na liczb? oznaczaj?c? oczekiwany sta? pracy jak ni?ej:
 
 * unemployed --> 0
 * less_than_year --> 1
@@ -202,9 +202,9 @@ Kolumna *present_employment* daje nam ³adne pogrupowanie d³ugoœci pracy w formie
 num_data$present_employment <- if_else(data$present_employment %in% c("unemployed"), 0, if_else(data$present_employment %in% c("less_than_year"), 1,if_else(data$present_employment %in% c("1-3_years"), 2,if_else(data$present_employment %in% c("4-6_yeras"), 5,7))))
 ```
 
-### 3.3.3. Porz¹dkowanie klientów wed³ug w³asnoœci materialnych
+### 3.3.3. Porz?dkowanie klient?w wed?ug w?asno?ci materialnych
 
-Na swój sposób patrz¹c na *property* widzimy pewien porz¹dek - jeœli osoba nie posiada *real_estate*, to mo¿e posiadaæ *building_savings*; jeœli nie to car, ale to nie oznacza, ¿e osoby z *real_estate* nie maj¹ *car*. Dlatego potraktujemy tê kolumnê jako uporz¹dkowanie *property*, gdzie osoby z *real_estate* maj¹ najwiêcej a *not_have/unknown* - najmiej.
+Na sw?j spos?b patrz?c na *property* widzimy pewien porz?dek - je?li osoba nie posiada *real_estate*, to mo?e posiada? *building_savings*; je?li nie to car, ale to nie oznacza, ?e osoby z *real_estate* nie maj? *car*. Dlatego potraktujemy t? kolumn? jako uporz?dkowanie *property*, gdzie osoby z *real_estate* maj? najwi?cej a *not_have/unknown* - najmiej.
 
 ```{r}
 num_data$property <- if_else( data$property == "real_estate", 3, if_else( data$property == "building_savings", 2, if_else( data$property == "car", 1, 0)))
@@ -212,11 +212,11 @@ num_data$property <- if_else( data$property == "real_estate", 3, if_else( data$p
 
 ### 3.3.4. Status konta czekowego
 
-Przytoczmy dokumentacjê:
+Przytoczmy dokumentacj?:
 
 *Status of existing checking account (A11: < 0 DM, A12: 0 <= x < 200 DM, A13 : >= 200 DM / salary assignments for at least 1 year, A14 : no checking account)*
 
-Oczywiœcie zastosujemy przypisanie:
+Oczywi?cie zastosujemy przypisanie:
 
 * not_have --> 0
 * low --> 1
@@ -232,29 +232,29 @@ num_data$checking_account_status[num_data$checking_account_status == 4] <- 0 # n
 
 ## 3.4. Zmienne "mieszane"
 
-### 3.4.1. *personal* czyli pleæ i stan cywilny na raz
+### 3.4.1. *personal* czyli ple? i stan cywilny na raz
 
-Tu zrobimy dwie kolumny numeryczne - pierwsz¹ binarn¹ *is_woman* naturalnie odpowiadaj¹c¹ za p³eæ, dodatkow¹ za pytanie o bycie singlem. W tym wypadku tracimy ma³¹ informacjê w stosunku do oryginalnego zbioru danych o odró¿nieniu singli i rozwodników, ale jest to bardzo ma³a grupa, a podzia³ na p³eæ powinien przynieœæ bardziej porz¹dany efekt.
+Tu zrobimy dwie kolumny numeryczne - pierwsz? binarn? *is_woman* naturalnie odpowiadaj?c? za p?e?, dodatkow? za pytanie o bycie singlem. W tym wypadku tracimy ma?? informacj? w stosunku do oryginalnego zbioru danych o odr??nieniu singli i rozwodnik?w, ale jest to bardzo ma?a grupa, a podzia? na p?e? powinien przynie?? bardziej porz?dany efekt.
 
 ```{r}
 num_data$is_woman <- if_else(data$personal == "female_d/s/m", 1, 0)
 num_data$is_single <- if_else(data$personal == "male_single", 1, 0) # nie ma kobiet singli
 ```
 
-## 3.5. Efekt koñcowy kodowania
+## 3.5. Efekt ko?cowy kodowania
 
-To by by³o na tyle. Zobaczmy efekt naszej pracy.
+To by by?o na tyle. Zobaczmy efekt naszej pracy.
 
 ```{r}
 knitr::kable(sample_n(num_data, 20))
 ncol(num_data)
 ```
 
-Liczba naszych kolumn wzros³a z 21 do 35. Koñcowy efekt nie jest szokuj¹cy pod wzglêdem liczby kolumn, a uda³o nam siê m¹drze pogrupowaæ dane pod dalsz¹ zabawê algorytmami uczenia maszynowego.
+Liczba naszych kolumn wzros?a z 21 do 35. Ko?cowy efekt nie jest szokuj?cy pod wzgl?dem liczby kolumn, a uda?o nam si? m?drze pogrupowa? dane pod dalsz? zabaw? algorytmami uczenia maszynowego.
 
 ## 4. Klasyfikacja
 
-Jednoznaczn¹ zmienn¹ celu naszej ramki danych jest oczywiœcie *is_good_customer_type* - problem op³acalnoœci dania kredytu przez bank klientowi to w³asnie to, co chcemy przewidzieæ. Podzielmy nasz dataset na X i y.
+Jednoznaczn? zmienn? celu naszej ramki danych jest oczywi?cie *is_good_customer_type* - problem op?acalno?ci dania kredytu przez bank klientowi to w?asnie to, co chcemy przewidzie?. Podzielmy nasz dataset na X i y.
 
 ```{r podzialXy}
 X <- num_data %>%
@@ -262,9 +262,9 @@ X <- num_data %>%
 y <- num_data$is_good_customer_type
 ```
 
-## 5. Podzia³ na zbior treningowy i testowy
+## 5. Podzia? na zbior treningowy i testowy
 
-Zastosujemy podzia³ 80% / 20%, bo czemu nie.
+Zastosujemy podzia? 80% / 20%, bo czemu nie.
 
 ```{r podzial80_20}
 set.seed(3114)
@@ -276,11 +276,14 @@ X_test <- head(X, n = 200)
 X_train <- tail(X, n = 800)
 y_test <- head(y, n = 200)
 y_train <- tail(y, n = 800)
+
+Reg_train <- head(num_data,n = 800)
+Reg_test <- tail(num_data,n = 200)
 ```
 
 ## 6. Zakonczenie
 
-To by by³o na tyle.
+To by by?o na tyle.
 
 Zapiszmy jeszcze utworzone ramki danych do nowego pliku, w celu wykorzystania ich w kolejnych krokach projektu.
 
@@ -289,6 +292,8 @@ write.csv(X_test, "x_test.csv")
 write.csv(X_train, "x_train.csv")
 write.csv(y_test, "y_test.csv")
 write.csv(y_train, "y_train.csv")
+write.csv(Reg_test, "Reg_test.csv")
+write.csv(Reg_train, "Reg_train.csv")
 ```
 
 Zobaczmy jeszcze efekt dzialania funkcji session_info:

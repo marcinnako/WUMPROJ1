@@ -81,6 +81,8 @@ lines(c(best_k,best_k),c(0,acc[best_k]),col = "green",lwd = 3)
 Jak widać na wykresie najwyższą wartość celności ,zaznaczoną na zielono, nasz model uzyskuje dla parametru k = `r toString(best_k)`.
 Sprawdzmy dokładniej jak nasz model przewiduje dla najlepszego parametru **k.** 
 
+## Test modelu dla najlepszego parametru
+
 ```{r}
 test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=best_k)
 tab <-  table( y_test[,1], test_pred)

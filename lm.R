@@ -1,7 +1,3 @@
-
-
-
-
 #load
 x_test <- read.csv( "x_test.csv")[-1]
 x_train <- read.csv( "x_train.csv")[-1]
@@ -13,53 +9,36 @@ accuracy <- function( table_in){
   sum( diag( table_in)) / sum( table_in)
 }
 
-#importance
+#bind for training
 train <- cbind( x_train, y_train)
 
+#training
 train_lm <- lm( x~., train)
+#summary
 sum_train_lm <- summary( train_lm)
-
-# p.val < 0.05
-#important_col_bool <- sum_train_lm$coefficients[-1,4] < 0.05
-#plus label
-#important_col_bool <- c( important_col_bool, TRUE)
-#train_cut <- train[,important_col_bool]
-
-#train on cuted
-#train_cut_lm <- lm( x~., train_cut)
-#summary(train_cut_lm)
-
-#predict and plot values
-#pred_train_cut <- predict(  train_cut_lm, x_test[,important_col_bool])
-#plot( sort(pred_train_cut))
-
-#looking for best cut
-#library(ROCR)
-#pred <- prediction( pred_train_cut, test$x)
-#perf <- performance(pred,"tpr","fpr")
-#plot( perf,colorize=TRUE)
-
-pred_train_cut <- predict(  train_lm, x_test)
+#predict
+pred_train <- predict(  train_lm, x_test)
 
 #metric
 accuracy <- function( table_in){
   sum( diag( table_in)) / sum( table_in)
 }
 
+#looking for best accuracy
 acc <- rep(0, 21)
 
 for( i in 0:20){
   predicted_lab <- ifelse( pred_train > i*0.05, 1, 0)
-  acc[i] <- accuracy( table( test$x, predicted_lab))
+  acc[i] <- accuracy( table( y_test[,1], predicted_lab))
 }
 
 best_split <- which.max( acc) *0.05
 best_split
 
-predicted_lab <- ifelse( pred_train_cut > best_split, 1, 0)
+predicted_lab <- ifelse( pred_train > best_split, 1, 0)
 
 #best split
-tab <-table( test$x, predicted_lab)
+tab <-table( y_test[,1], predicted_lab)
 accuracy( tab)
 tab
 

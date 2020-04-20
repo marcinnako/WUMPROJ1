@@ -1,7 +1,7 @@
 ---
 title: "Raport"
 author: "Jakub Kosterna, Marcin Łukaszyk, Mikołaj Malec"
-date: "15 kwietnia 2020"
+date: "15/04/2020"
 output: pdf_document
 ---
 
@@ -31,13 +31,39 @@ Końcowy efekt zaprezentował się następująco:
 
 Wielkim szczęściem okazał się za to fakt, że nasza ramka danych **nie zawierała braków ani niepokojących outlierów**.
 
+\newpage
+
 # 3. Eksploracja
 
 ... dla tak przyjemnych i życiowych danych była czystą przyjemnością.
 
 Bardzo pomocny okazało się narzędzie **DataExplorer**, które pokazało wiele ciekawych zależności w tabeli automatycznie.
 
-**<TU SCREENY TRZA WRZUCIĆ>**
+Elegancki ogląd naszych danych otrzymaliśmy dzięki zaoferowanemu przez funkcję drzewko typów.
+
+![](grafika/R1DrzewoTypow.png)
+
+**Wykresy kolumnowe gęstości występowania danych** utwierdziły nas w przekonaniu, że z naszą ramką danych wszystko w porządalu.
+
+![](grafika/R2GestoscWystepowaniaDanych.png)
+
+Ładny ogląd balansu wartości dały nam **barcharty zmiennych numerycznych**.
+
+![](grafika/R3Barcharty1.png)
+
+![](grafika/R4Barcharty2.png)
+
+Bardzo przydatna okazała się także wizualizacja **QQplot** - dzięki niej dostaliśmy przystępny obraz wartości liczbowych w naszej dataframe oraz ich rozkład.
+
+![](grafika/R5QQplot.png)
+
+Także i **macierz korelacji** tym bardziej zbliżyła nas do pełnego pojęcia pełnego *german credit data* i wiele wartości pokryło się z naszą intuicją.
+
+![](grafika/R6MacierzKorelacji.png)
+
+Na koniez przyjrzeliśmy się jeszcze **wykresowi analizy głównych składowych**.
+
+![](grafika/R7AnalizaGlownychSkladowych.png)
 
 Oprócz tego postanowiliśmy sami przyjrzeć się wybranym cechom.
 
@@ -65,6 +91,8 @@ Dane mówią, że:
 Jak można się było spodziewać, pożyczka chętniej jest także udzielana na krótszy okres czasu.
 
 ![](grafika/07CustomerTypeByDuration.png)
+
+\newpage
 
 # 4. Kodowanie
 
@@ -115,9 +143,26 @@ W celu znalezienia najlepszych hiperparametrów, porównywaliśmy między innymi
 
 ![](grafika/13SzukanieDobregoHyperparametruDrzewko.png)
 
-**TODO**
+Tutaj:
 
-**FOTY**
+* żółty - *accuracy*
+* niebieski - *precision*
+* zielony - *recall*
+* czerwony - *f1*
+
+Biorąc pod uwagę ideę naszego problemu, zdecydowaliśmy się na to z głębokością 6.
+
+Prezentuje się ono tak:
+
+![](grafika/14DrzewoNajlepsze.png)
+
+Zajęliśmy się także **lasami losowymi** i koniec końców porównaliśmy otrzymane miary.
+
+W efekcie otrzymaliśmy taką oto tabelkę:
+
+![](grafika/15PorownanieMiar.png)
+
+Ze względu na koncepcję naszego zadania, stwierdziliśmy, że **sumarycznie najlepiej wypada drzewo losowe o głębokości 6**.
 
 ## 5.2. k najbliższych sąsiadów
 

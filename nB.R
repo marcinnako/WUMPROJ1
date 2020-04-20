@@ -1,6 +1,8 @@
 
 library( e1071)
 
+#becouse naive baiyens is based on categories there is need to clean data onece more
+#split will be the same
 data <- read.csv("german_credit_data_weka_dataset.csv")
 
 levels(data[,1]) <- c("low", "fair", "high", "not_have") #DM low<0<fair<200<high
@@ -19,6 +21,7 @@ levels(data[,20]) <- c("yes", "no")
 data[,21] <- as.factor(as.character(data[,21]))
 levels(data[,21]) <- c("Good", "Bad")
 
+## continious numerical value is splited in chunks
 #age
 data$age <- cut( data$age, breaks = seq( 10, 80, by = 10))
 
@@ -28,7 +31,7 @@ data$credit_amount <- cut(  data$credit_amount, seq(0, 16000, length.out = 9))
 #duration
 data$duration <- cut( data$duration, breaks = c(0,12,24,36,48,60,72))
 
-#as.facor
+#to be sure: evrytching will be factor as.facor
 for (column in names(data)) {
   data[,column] <- as.factor( data[,column])
 }
@@ -36,7 +39,7 @@ for (column in names(data)) {
 
 n <-which( names( data) =="customer_type")
 
-#the same split
+#the same split thanks to set.seed
 set.seed(3113)
 rows <- sample(nrow(data))
 num_data <- data[rows, ]
@@ -65,16 +68,18 @@ f1 <- function( table_in) {
 
 true_labels <- test_data[,n]
 
-#training | laplance =1 for 0 probability
+#training | no need for higher laplance;
 nB <- naiveBayes( customer_type~. , data = train_data, laplace = 0)
 pred_nB_raw <-  predict( nB, test_data[-n], type = "raw")
 
+#plot roc curve
 library( ROCR)
 x <- prediction( pred_nB_raw[,1], true_labels)
 ROC <- performance( x, "tpr", "fpr")
 plot(ROC, col = as.list(1:10))
 abline( 0 ,1, col = "blue")
 
+#looking for best accuracy
 for (i in 1:9) {
   pred_nB <- factor( ifelse( pred_nB_raw[,1] > i/10, "Good", "Bad"), levels = c("Good","Bad"))
   tab <- table( true_labels, pred_nB)
@@ -83,8 +88,9 @@ for (i in 1:9) {
   cat(accuracy(tab))
   cat("\n \n")
 }
-#accuracy najlepsze dla 0.5: 0.78
+#accuracy best for 0.5: 0.775
 
+#looking for best f1
 for (i in 1:9) {
   pred_nB <- factor( ifelse( pred_nB_raw[,1] > i/10, "Good", "Bad"), levels = c("Good","Bad"))
   tab <- table( true_labels, pred_nB)
@@ -109,11 +115,13 @@ tab
 
 
 
-# analiza modelu
+# model analise
 library( DataExplorer)
 DataExplorer::plot_correlation( data)
-#mała korelacja
+#small corelaction
 
+
+#looking for each category proporction Good / Bad
 diff_list <- lapply( nB$tables, function(category){
   n <- dim(category)[2]
   out <- rep(-1,n)
@@ -134,20 +142,23 @@ order_vec <- diff_vec_some
 order_vec[ order_vec < 1] <- 1/order_vec[ order_vec < 1]
 diff_vec_some_ordered <- diff_vec_some[ order( order_vec, decreasing = TRUE)]
 
+#which categories has many cases
 case_num <- 80 #/800 cases
 cases <- unlist( lapply(train_data[-n], function(column){ table(column)}))
 cases_many <- cases[ cases >= case_num]
 
+#print
 diff_vec_some_ordered[ names(diff_vec_some_ordered) %in% names(cases_many)]
 
+#concluson: it's safe to safe based on big nuber of cases that people faling in one of those categories are more likly to get credit / be denaid of one
 
 
 
 
 
 
-
-#to show cases
+#plot proporction Good / Bad vs. number of cases in each categorie
+#with lines wich cut the cases
 plot_df <- data.frame( diff_vec, cases)
 
 library( plotly)

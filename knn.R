@@ -22,7 +22,7 @@ accuracy <- function( table_in){
 }
 
 #looking for best k
-n <- 40
+n <- sqrt( dim(x_train)[1])
 acc <- rep(0,n)
 for(k in 1:n){
 test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=k)

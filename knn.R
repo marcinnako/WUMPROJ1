@@ -1,4 +1,5 @@
 
+#library used for knn
 library( class)
 
 #load
@@ -9,6 +10,7 @@ y_train <- read.csv( "y_train.csv")[-1]
 
 #normaliacion to ~(0,1)
 for( coli in 1:dim(x_train)[2]){
+  #x and y have o be noemalized in the same way
   c_min <- min( c(x_train[,coli], x_test[,coli]))
   c_max <- max( c(x_train[,coli], x_test[,coli]))
   
@@ -21,22 +23,26 @@ accuracy <- function( table_in){
   sum( diag( table_in)) / sum( table_in)
 }
 
-#looking for best k
-n <- sqrt( dim(x_train)[1])
+##looking for best k = number of groups
+n <- sqrt( dim(x_train)[1]) #arbitrary number for top number of groups
 acc <- rep(0,n)
 for(k in 1:n){
-test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=k)
-
-tab <-  table( y_test[,1], test_pred)
-acc[k] <- accuracy(tab)
+  test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=k)
+  
+  tab <-  table( y_test[,1], test_pred)
+  acc[k] <- accuracy(tab)
 }
-k=1:n
+k=1:n #for plot
+#k vs. accuracy
 plot( k, acc, type = "l")
 
+#best k
 best_k <- which.max( acc)
 
 test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=best_k)
 tab <-  table( y_test[,1], test_pred)
 
+best_k
 accuracy( tab)
 tab
+

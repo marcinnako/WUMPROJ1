@@ -1,8 +1,8 @@
 
 library( e1071)
 
-read.csv("german_credit_data_weka_dataset.csv")
-
+#becouse naive baiyens is based on categories there is need to clean data onece more
+#split will be the same
 data <- read.csv("german_credit_data_weka_dataset.csv")
 
 levels(data[,1]) <- c("low", "fair", "high", "not_have") #DM low<0<fair<200<high
@@ -21,38 +21,31 @@ levels(data[,20]) <- c("yes", "no")
 data[,21] <- as.factor(as.character(data[,21]))
 levels(data[,21]) <- c("Good", "Bad")
 
+## continious numerical value is splited in chunks
 #age
-x_test$age <- cut( x_test$age, breaks = seq( 10, 80, by = 10))
-x_train$age <- cut( x_train$age, breaks = seq( 10, 90, by = 10))
+data$age <- cut( data$age, breaks = seq( 10, 80, by = 10))
 
 #credit_amount
-x_test$credit_amount <- cut(  x_test$credit_amount, seq(0, 16000, length.out = 9))
-x_train$credit_amount <- cut( x_train$credit_amount, seq(0, 16000, length.out = 9))
+data$credit_amount <- cut(  data$credit_amount, seq(0, 16000, length.out = 9))
 
 #duration
-x_test$duration <- cut( x_test$duration, breaks = c(0,12,24,36,48,60,72))
-x_train$duration <- cut( x_train$duration, breaks = c(0,12,24,36,48,60,72))
+data$duration <- cut( data$duration, breaks = c(0,12,24,36,48,60,72))
 
-#as.facor
-for (column in names(x_test)) {
-  x_test[,column] <- as.factor( x_test[,column])
-  x_train[,column] <- as.factor( x_train[,column])
+#to be sure: evrytching will be factor as.facor
+for (column in names(data)) {
+  data[,column] <- as.factor( data[,column])
 }
 
 
+n <-which( names( data) =="customer_type")
 
-
-#the same split
-n <- which( names(data) == "customer_type")
-X <- data[,-n]
-y <- data[,n]
-
+#the same split thanks to set.seed
 set.seed(3113)
-rows <- sample(nrow(num_data))
-num_data <- num_data[rows, ]
+rows <- sample(nrow(data))
+num_data <- data[rows, ]
 
-test_data <- head(num_data,n = 200)
-train_data <- tail(num_data,n = 800)
+test_data <- head(data,n = 200)
+train_data <- tail(data,n = 800)
 
 
 
@@ -72,44 +65,117 @@ f1 <- function( table_in) {
 }
 
 
-#importance
-train <- cbind( x_train, y_train)
 
-#training | laplance =1 for 0 probability
-nB <- naiveBayes( x~. , data = train, laplace = 0)
-nB
-pred_nB_raw <-  predict( nB, x_test, type = "raw")
+true_labels <- test_data[,n]
 
+#training | no need for higher laplance;
+nB <- naiveBayes( customer_type~. , data = train_data, laplace = 0)
+pred_nB_raw <-  predict( nB, test_data[-n], type = "raw")
+
+#plot roc curve
 library( ROCR)
-x <- prediction( pred_nB_raw[,2], y_test[,1])
+x <- prediction( pred_nB_raw[,1], true_labels)
 ROC <- performance( x, "tpr", "fpr")
 plot(ROC, col = as.list(1:10))
 abline( 0 ,1, col = "blue")
 
+#looking for best accuracy
 for (i in 1:9) {
-  pred_nB <- ifelse( pred_nB_raw[,1] > i/10, 0, 1)
-  tab <- table( y_test[,1], pred_nB)
+  pred_nB <- factor( ifelse( pred_nB_raw[,1] > i/10, "Good", "Bad"), levels = c("Good","Bad"))
+  tab <- table( true_labels, pred_nB)
   cat( c( i,  ": "))
   #print(tab)
   cat(accuracy(tab))
   cat("\n \n")
 }
-#accuracy najlepsze dla 0.5: 0.78
+#accuracy best for 0.5: 0.775
 
+#looking for best f1
 for (i in 1:9) {
-  pred_nB <- ifelse( pred_nB_raw[,1] > i/10, 0, 1)
-  tab <- table( y_test[,1], pred_nB)
+  pred_nB <- factor( ifelse( pred_nB_raw[,1] > i/10, "Good", "Bad"), levels = c("Good","Bad"))
+  tab <- table( true_labels, pred_nB)
   cat( c( i,  ": "))
   #print(tab)
   cat(f1(tab))
   cat("\n \n")
 }
-#f1 też najlepsze dla 0.5: 0.85
+#f1 najlepsze dla 0.7: 0.61
 
-
-pred_nB <- ifelse( pred_nB_raw[,1] > 0.5, 0, 1)
-tab <- table( y_test[,1], pred_nB)
+i=7
+pred_nB <- factor( ifelse( pred_nB_raw[,1] > i/10, "Good", "Bad"), levels = c("Good","Bad"))
+tab <- table( true_labels, pred_nB)
 tab
+
+
+
+
+
+
+
+
+
+
+# model analise
+library( DataExplorer)
+DataExplorer::plot_correlation( data)
+#small corelaction
+
+
+#looking for each category proporction Good / Bad
+diff_list <- lapply( nB$tables, function(category){
+  n <- dim(category)[2]
+  out <- rep(-1,n)
+  for (i in 1:n) {
+    out[i] <- category[1,i] / category[2,i]
+  }
+  names(out) <- colnames(category)
+  return(out)
+})
+
+
+epsilon <- 2
+
+#how many times is likly to get a credit
+diff_vec <- unlist(diff_list)
+diff_vec_some <-  diff_vec[ diff_vec > epsilon | 1/ diff_vec > epsilon]
+order_vec <- diff_vec_some
+order_vec[ order_vec < 1] <- 1/order_vec[ order_vec < 1]
+diff_vec_some_ordered <- diff_vec_some[ order( order_vec, decreasing = TRUE)]
+
+#which categories has many cases
+case_num <- 80 #/800 cases
+cases <- unlist( lapply(train_data[-n], function(column){ table(column)}))
+cases_many <- cases[ cases >= case_num]
+
+#print
+diff_vec_some_ordered[ names(diff_vec_some_ordered) %in% names(cases_many)]
+
+#concluson: it's safe to safe based on big nuber of cases that people faling in one of those categories are more likly to get credit / be denaid of one
+
+
+
+
+
+
+#plot proporction Good / Bad vs. number of cases in each categorie
+#with lines wich cut the cases
+plot_df <- data.frame( diff_vec, cases)
+
+library( plotly)
+library( dplyr)
+p <- plot_ly( plot_df,
+         x = ~diff_vec,
+         y = ~cases,
+         type = "scatter",
+         text = rownames(plot_df)) %>%
+  layout(xaxis = list(type = "log"),
+         showlegend = FALSE) %>%
+  add_lines( y = case_num) %>%
+  add_lines( x = epsilon) %>%
+  add_lines( x = 1/epsilon)
+p
+
+
 
 
 

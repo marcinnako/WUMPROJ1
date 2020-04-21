@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ## Czym jest algorytm K Nearest Neighbor?
@@ -27,8 +28,8 @@ y_train <- read.csv( "y_train.csv")[-1]
 ## Normalizacja
 
 Do wyznaczenia sąsiadów będziemy używać zwykłej metryki eukidysowej. 
-Jednakżę dane trzeba znormalizować ponieważ w innym wypadku odległości pomiędzy danymi o wypłacie będą o wiele bardziej wpływowe niż np liczba dzieci.
-Taka różnica w wielkośći zmiennych nieunormowanych spowodowała  nieistitność zmiennej liczby dzieci co źle wpłyneło by na nasz model
+Jednakżę dane trzeba znormalizować ponieważ w innym wypadku odległości pomiędzy danymi o wieku będą o wiele bardziej wpływowe niż np czy posida telefon.
+Taka różnica w wielkośći zmiennych nieunormowanych spowodowała  nieistitność zmiennej posiadania telefonu co źle wpłyneło by na nasz model
 
 ```{r}
 #normaliacion to ~(0,1)
@@ -84,12 +85,13 @@ Spróbujmy teraz sprawdzić jak celny jest nasz model w zależnośći od paramet
 Do obliczenia jakośći naszego modelu sprawdzimy jego działanie w z parametrem w przedziale od 1 do pierwiastka z wielkości danych trenningowych.
 
 ```{r}
-n <- sqrt( dim(x_train)[1]) 
+n <- sqrt( dim(x_train)[1])
 acc <- rep(0,n)
 ftest<- rep(0,n)
 rec <- rep(0,n)
 pre <- rep(0,n)
 for(k in 1:n){
+  #tworzenie modelu dla danego k
   test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=k)
   
   tab <-  table( y_test[,1], test_pred)
@@ -98,14 +100,14 @@ for(k in 1:n){
   rec[k] <- recall(tab)
   pre[k] <- precision(tab)
 }
-k=1:n
-best_k <- which.max( acc)
 ```
 
 Po przeiterowaniu przez wszytskie parametry zmiennej k można pokazać dane na wykresie.
 
 
-```{r}
+```{r, echo=FALSE}
+k=1:n
+best_k <- which.max( acc) #k dające najlepsze accuracy
 plot(k, acc, type = "l", lwd = 3, xlim = c(0,n),ylim = c(0,1), col = "#5C5B5A")
 lines(k,ftest,type = "l", lwd = 3,col = "#870A30")
 lines(k,rec,type = "l", lwd = 3,col = "#348BA5")
@@ -123,7 +125,7 @@ Sprawdzmy dokładniej jak nasz model przewiduje dla najlepszego parametru **k.**
 
 ## Test modelu dla najlepszego parametru
 
-```{r}
+```{r, echo=FALSE}
 test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=best_k)
 tab <-  table( y_test[,1], test_pred)
 knitr::kable(tab)

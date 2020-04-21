@@ -118,22 +118,29 @@ Końcowy efekt wyszedł encodingu wyszedł następujący:
 
 Tutaj kolory odpowiadające miarom:
 
-* żółty - *accuracy*
-* niebieski - *precision*
-* zielony - *recall*
-* czerwony - *f1*
-
 # 5. Poszukiwanie najlepszego modelu - dyskusja
 
-W celu wybrania tego jednego właściwego modelu, wpierw postanowiliśmy podzielić się popularnymi znanymi już przez nas metodami i indywidualne zajęcie się nimi. Oto tego efekty:
+W celu wybrania tego jednego właściwego modelu, wpierw postanowiliśmy podzielić się popularnymi znanymi już przez nas metodami i indywidualne zajęcie się nimi.
 
-**TODO**
+**Rozpatrzyliśmy i przetestowaliśmy dla różnych hiperparametrów cztery algorytmy uczenia maszynowego**:
 
-## 5.1. Drzewo klasyfikacyjny i las losowy
+1. Drzewo klasyfikacyjne i lasy losowe
+
+2. Regresja liniowa
+
+3. K-najbliższych sąsiadów
+
+4. Naiwny klasyfikator bayesowski
+
+... przy czym dla pierwszych trzech przygotowaliśmy dłuższe skrypty i raporty w formacie .Rmd - można je znaleźć pod [kolejno] *KM3Drzewa.Rmd*, *KM3Regresja.Rmd* i *KM3knn.Rmd*.
+
+Efekty testowania mniej godne zraportowania znajdują się także w pojedynczych skryptach: *lm.r*, *nb.r* i *knn.r*.
 
 Ku porównaniu efektów modeli postanowiliśmy porównywać cztery chyba najbardziej podstawowe w tej kwestii, ale i przy tym dające ogrom informacji miary: **accuracy**, **precision**, **recall** i **f1**.
 
 ![](grafika/11MiaryOcenaKlasyfikatora.png)
+
+## 5.1. Drzewo klasyfikacyjny i las losowy
 
 Uruchomienie algorytmu z pakietu *rpart* dało mało satysfakcjonujący wynik w myśli o logice biznesowej.
 
@@ -162,21 +169,71 @@ W efekcie otrzymaliśmy taką oto tabelkę:
 
 ![](grafika/15PorownanieMiar.png)
 
+
 Ze względu na koncepcję naszego zadania, stwierdziliśmy, że **sumarycznie najlepiej wypada drzewo losowe o głębokości 6**.
 
 ## 5.2. k najbliższych sąsiadów
 
-**TODO**
+... napisaliśmy oczywiście ze wskazaną wcześniejszą **normalizacją**.
 
-**FOTY**
+![](grafika/K1Normalizacja.png)
+
+Również i tutaj przeszukaliśmy różne hyperparameters w celu znalezienia tego najlepszego.
+
+Najbardziej satysfakcjonujący wydał się **efekt dla k = 26**.
+
+![](grafika/K2NajlepszeK.png)
+
+Finalnie otrzymaliśmy *acccuracy* na poziomie 70%, a *confusion matrix* zaprezentował się tak:
+
+![](grafika/K3ConfusionMatrix.png)
 
 ## 5.3. Regresja liniowa
 
-**TODO**
+Tutaj z pomocą przyszła nam funkcja *glm()*. Po dopasowaniu dobry obraz dała nam także metoda *summary*, ładnie podsumowująca co automatyczne narzędzie utworzyło.
 
-**FOTY**
+![](grafika/Reg1GlmFit.png)
+
+Tak zaimplementowana regresja liniowa nie daje binarnego dopasowania tak / nie, lecz prawdopodobieństwa na owe dwa stany. Postanowiliśmy najprościej - i chyba na tym poziomie najlepiej - przyjąc, że **jeśli p-stwo na "tak" >50% - klient został uznany za zdolnego finansowo**. Jeśli nie - przeciwnie.
+
+![](grafika/Reg2Accuracy.png)
+
+Macierz pomyłek i wcześniej zaplanowane badane miary zaprezentowały się następująco:
+
+![](grafika/Reg3ConfusionMatrix.png)
+
+![](grafika/Reg4Miary.png)
+
+W celu uzyskania potencjalnie lepszych wyników postanowiliśmy także pozbyć się tych kolumn, które według *summary()* najmniej wpływaną na model.
+
+![](grafika/Reg5Miary2.png)
+
+Miary nie okazały się być jednak lepsze.
+
+Bardziej satysfakcjonujący wynik dało za to usunięcie zmiennych:
+
+* *age*
+* *is_foreign_worker*
+* *present_employment*
+* *property*
+* *checking_account_status*
+* *is_single*
+
+Tutaj już radość została osiągnięta.
+
+![](grafika/Reg6Miary3.png)
+
+Ostatecznie postanowiliśmy jeszcze wziąć tylko pięć kolumn o największym znaczeniu według *summary()*.
+
+![](grafika/Reg7Miary4.png)
+
+... taki model okazał się jednak bardzo zły, gdyż wszystkie obserwacje zostały zaklasyfikowane jako prawdziwe.
+
+**Podsumowując** najlepszy okazał się model pierwszy - chyba, że najważniejsze znaczenie miałoby mieć *recall* - wtedy przy nieco gorszym *precision* i *accuracy* wygrywa model nieuwzględniający wspomnianych wcześniej sześciu parametrów.
 
 # 6. Wybór najlepszego algorytmu uczenia maszynowego i implementacja
+
+**BAYES??**
 
 **TODO**
 

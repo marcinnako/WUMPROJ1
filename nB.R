@@ -40,7 +40,7 @@ for (column in names(data)) {
 n <-which( names( data) =="customer_type")
 
 #the same split thanks to set.seed
-set.seed(3113)
+set.seed(3114)
 rows <- sample(nrow(data))
 num_data <- data[rows, ]
 

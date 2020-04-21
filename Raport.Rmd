@@ -11,17 +11,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # 1. Ogólnie
 
-**German credit data** to bardzo ładny zbiór danych pod naukę uczenia maszynowego. Jest on względnie nieduży, gdyż zawiera 1000-czną próbkę osób ubiegających się o kredyt, jednak jest przy tym wydaje się reprezentatywny (dane zdają się dobrze odzwierciedlać populację) i zawiera dużo informacji na temat każdego klienta.
+**German credit data** to bardzo ładny zbiór danych pod naukę uczenia maszynowego. Jest on względnie nieduży, gdyż zawiera 1000-czną próbkę osób ubiegających się o kredyt, jednak jest przy tym reprezentatywny (dane dobrze odzwierciedlają populację) i zawiera dużo informacji na temat każdego klienta.
 
-W ciągu ostatnich tygodni pierwszorzędnie dobrze zapoznaliśmy się z daną ramką danych, następnie przygotowaliśmy ją pod odpalania algorytmów machine learning, żeby na końcu wybrać ten jeden fajny model i go przetestować.
+W ciągu ostatnich tygodni pierwszorzędnie dobrze zapoznaliśmy się z daną ramką danych, następnie przygotowaliśmy ją do odpalania algorytmów machine learning, żeby na końcu wybrać ten jeden fajny model i go przetestować.
 
 # 2. Czyszczenie
 
-Pierwotna wersja data frame nie była najweselsza na świecie - zamiast ludzkich liczb czy jasnych wartości typu faktor, mieliśmy do czynienia z chaosem w postaci **dziwnych oznaczeń** takich jak widać na załączonym obrazku:
+Pierwotna wersja data frame nie była najweselsza na świecie. Zamiast ludzkich liczb czy jasnych wartości typu faktor, mieliśmy do czynienia z chaosem w postaci **dziwnych oznaczeń** takich jak widać na załączonym obrazku:
 
 ![](grafika/01WstepnaTabela.png)
 
-Z pomocą przyszła **dokumentacja**, która rozwiała wszelkie możliwości. W celu dalszej pracy z naszymi danymi, podmieniliśmy skrótowe identyfikatory na ciągi znaków przyjazne użytkownikowi.
+Z pomocą przyszła **dokumentacja**, która rozwiała wszelkie możliwości. W celu dalszej pracy z naszymi danymi podmieniliśmy skrótowe identyfikatory na ciągi znaków przyjazne użytkownikowi.
 
 ![](grafika/02PierwszeCzyszczenie.png)
 
@@ -29,7 +29,7 @@ Końcowy efekt zaprezentował się następująco:
 
 ![](grafika/03TabelaPoPierwszymCzyszczeniu.png)
 
-Wielkim szczęściem okazał się za to fakt, że nasza ramka danych **nie zawierała braków ani niepokojących outlierów**.
+Wielkim szczęściem okazał się za to fakt, że nasza ramka danych **nie zawierała braków ani niepokojących outlier-ów**.
 
 \newpage
 
@@ -43,11 +43,11 @@ Elegancki ogląd naszych danych otrzymaliśmy dzięki zaoferowanemu przez funkcj
 
 ![](grafika/R1DrzewoTypow.png)
 
-**Wykresy kolumnowe gęstości występowania danych** utwierdziły nas w przekonaniu, że z naszą ramką danych wszystko w porządalu.
+**Wykresy kolumnowe gęstości występowania danych** utwierdziły nas w przekonaniu, że z naszą ramką danych wszystko w porządku.
 
 ![](grafika/R2GestoscWystepowaniaDanych.png)
 
-Ładny ogląd balansu wartości dały nam **barcharty zmiennych numerycznych**.
+Ładny ogląd balansu wartości dały nam **barchart-y zmiennych numerycznych**.
 
 ![](grafika/R3Barcharty1.png)
 
@@ -61,19 +61,19 @@ Także i **macierz korelacji** tym bardziej zbliżyła nas do pełnego pojęcia 
 
 ![](grafika/R6MacierzKorelacji.png)
 
-Na koniez przyjrzeliśmy się jeszcze **wykresowi analizy głównych składowych**.
+Na koniec przyjrzeliśmy się jeszcze **wykresowi analizy głównych składowych**.
 
 ![](grafika/R7AnalizaGlownychSkladowych.png)
 
 Oprócz tego postanowiliśmy sami przyjrzeć się wybranym cechom.
 
-Okazało się między innymi, że stereotypy można wyrzucić do kosza - mężczyźni o wiele częściej biorą kredyt ze względu na potrzebę funduszy na gospodarstwo domowe i nie widać znaczącej przewagi w stosunku do kobiet jeśli idzie o chęć postawienia pieniędzy na auto.
+Okazało się między innymi, że stereotypy można wyrzucić do kosza. Mężczyźni o wiele częściej biorą kredyt ze względu na potrzebę funduszy na gospodarstwo domowe i nie widać znaczącej przewagi w stosunku do kobiet, jeśli idzie o chęć postawienia pieniędzy na auto.
 
-Bez zaskoczeń o wiele częściej na dom stawiają mężczyźni po ślubie niż ci samotni czy rozwodnicy. Co ciekawe ci sami ani razu nie wzięli pożyczki na wyposażenie / meble [przynajmniej na te 1000 osobników], zaś rozwodnicy i separatyści… przeciwnie do pozostałych grup nie myślą tu wręcz wcale o dodatkowej mamonie na biznes.
+Bez zaskoczeń o wiele częściej na dom stawiają mężczyźni po ślubie niż ci samotni czy rozwodnicy. Co ciekawe ci sami ani razu nie wzięli pożyczki na wyposażenie / meble [przynajmniej na te 1000 osobników], a rozwodnicy i separatyści… przeciwnie do pozostałych grup nie myślą tu wręcz wcale o dodatkowej mamonie na biznes.
 
 ![](grafika/04PurpuseByMaritialStatus.png)
 
-Wychodzi również na to, że generalnie większym zaufaniem firma daży osoby starsze:
+Wychodzi również na to, że z reguły większym zaufaniem firma darzy osoby starsze:
 
 ![](grafika/05CustomerTypeByAge.png)
 
@@ -83,12 +83,12 @@ Wyciągnęliśmy także wnioski na podstawie płci, wieku i stanu cywilnego.
 
 Dane mówią, że:
 
-1. Najmniej ufamy rozwiedzionym facetom - zwłaszcza tym po 30, im zwykle nie dajemy.
+1. Najmniej ufamy rozwiedzionym facetom, zwłaszcza tym po 30, im zwykle nie dajemy.
 2. Najbezpieczniejsi za to są też faceci po 30… ale single.
 3. Żonaci to też dobre ziomki.
-4. Kobiety są gorsze od mężczyzn, ale tylko przed 40. Potem raczej spokój, za wyjątkiem 70-tki psującej obraz.
+4. Kobiety są gorsze od mężczyzn, ale tylko przed 40. Potem raczej spokój, z wyjątkiem 70-tki psującej obraz.
 
-Jak można się było spodziewać, pożyczka chętniej jest także udzielana na krótszy okres czasu.
+Jak można się było spodziewać, pożyczka chętniej jest także udzielana na krótszy okres.
 
 ![](grafika/07CustomerTypeByDuration.png)
 
@@ -96,9 +96,9 @@ Jak można się było spodziewać, pożyczka chętniej jest także udzielana na 
 
 # 4. Kodowanie
 
-W ramach drugiego kamienia milowego dokonaliśmy szczegółowej analizy pod względem sensownego encodingu i **każdej kolumnie przyjrzeliśmy się pod lupą**.
+W ramach drugiego kamienia milowego dokonaliśmy szczegółowej analizy pod względem sensownego encoding-u i **każdej kolumnie przyjrzeliśmy się pod lupą**.
 
-Spośród 21 kolumn, aż 14 okazało się być tekstowymi.
+Spośród 21 kolumn, aż 14 okazało się tekstowymi.
 
 Do czynienia mieliśmy z problemami:
 
@@ -108,11 +108,11 @@ Do czynienia mieliśmy z problemami:
 
 ![](grafika/08ZarobkiStazPracyWSkalach.png)
 
-4. Zmiennych mieszanych - zawierających w sobie po parę ciekawych informacji
+4. Zmiennych mieszanych, zawierających w sobie po parę ciekawych informacji
 
 ![](grafika/09Kodowanie.png)
 
-Końcowy efekt wyszedł encodingu wyszedł następujący:
+Końcowy efekt encodingu wyszedł następujący:
 
 ![](grafika/10KoncowyWynik.png)
 
@@ -123,9 +123,9 @@ Tutaj kolory odpowiadające miarom:
 * zielony - *recall*
 * czerwony - *f1*
 
-# 5. Poszukiwanie najlepszego modelu - dyskusja
+# 5. Poszukiwanie najlepszego modelu — dyskusja
 
-W celu wybrania tego jednego właściwego modelu, wpierw postanowiliśmy podzielić się popularnymi znanymi już przez nas metodami i indywidualne zajęcie się nimi. Stworzyliśmy następujące modele:
+W celu wybrania tego jednego właściwego modelu wpierw postanowiliśmy podzielić się popularnymi znanymi już przez nas metodami i indywidualne zajęcie się nimi. Stworzyliśmy następujące modele:
 
 1. Drzewa
 
@@ -135,9 +135,9 @@ W celu wybrania tego jednego właściwego modelu, wpierw postanowiliśmy podziel
 
 4. Regresja Logistyczna
 
-5. Naiwny klasyfikator bayesowski
+5. Naiwny klasyfikator bayes-owski
 
-Cała praca nad tworzeniem, badaniem i rozwijaniem modeli została opisana w osobnych raportach. Kojejno: *KM3Drzewa.Rmd*, *KM3Knn.Rmd*, *KM3RegresjaLiniowa.Rmd*, *KM3RegresjaLogistyczna.Rmd* i *KM3NaiwnyBayes.Rmd*.
+Cała praca nad tworzeniem, badaniem i rozwijaniem modeli została opisana w osobnych raportach. Kolejno: *KM3Drzewa.Rmd*, *KM3Knn.Rmd*, *KM3RegresjaLiniowa.Rmd*, *KM3RegresjaLogistyczna.Rmd* i *KM3NaiwnyBayes.Rmd*.
 
 ## 5.1. Drzewo klasyfikacyjny i las losowy
 
@@ -149,7 +149,7 @@ Uruchomienie algorytmu z pakietu *rpart* dało mało satysfakcjonujący wynik w 
 
 ![](grafika/12DrzewkoPrymitywne.png)
 
-W celu znalezienia najlepszych hiperparametrów, porównywaliśmy między innymi miary dla kolejnych maksymalnie narzuconych głębokości drzewa.
+W celu znalezienia najlepszych hiperparametrów porównywaliśmy między innymi miary dla kolejnych maksymalnie narzuconych głębokości drzewa.
 
 ![](grafika/13SzukanieDobregoHyperparametruDrzewko.png)
 
@@ -176,14 +176,14 @@ Ze względu na koncepcję naszego zadania, stwierdziliśmy, że **sumarycznie na
 
 ## 5.2. k najbliższych sąsiadów
 
-Jest to algorytm polegający na "porównaniu" badanej próbki z wartościami które mamy w bazie i wywnioskowanie na podstawie *k* rekordów z bazy jak zklasyfikować próbkę.
-Do tego potrebujemy specjalnie unormowanych danych.
+Jest to algorytm polegający na "porównaniu" badanej próbki z wartościami które mamy w bazie i wywnioskowanie na podstawie *k* rekordów z bazy jak zaklasyfikować próbkę.
+Do tego potrzebujemy specjalnie unormowanych danych.
 
 ![](grafika/16Knn-Normalizacja.png)
 
-Używając funkcji knn() z pakietu class możemy stworzyć nasz model.
-Pozostaje nam dopasowanie parametru *k* tak aby nasz model był jak najbardziej optymalny.
-Do tego posłużymy się zwykłą metryką celności (% poprawnych klasyfikacji)
+Używając funkcji knn() z pakietu class, możemy stworzyć nasz model.
+Pozostaje nam dopasowanie parametru *k* tak, aby nasz model był jak najbardziej optymalny.
+Do tego posłużymy się zwykłą metryką celności (proc. poprawnych klasyfikacji)
 
 ![](grafika/17Knn-Wyrres(2).png)
 
@@ -191,34 +191,33 @@ Otrzymujemy parametr *k = 11*.
 
 ![](grafika/17.1KnnWyniki.png)
 
-
 ## 5.3. Regresja liniowa
 
 Regresja liniowa polega na stworzeniu modelu na podstawie zależności liniowych pomiędzy zmiennymi.
 
 ![](grafika/18RegLin.png)
 
-Po stworzeniu modelu należy znaleść odpowiedni punkt odcieńcia który przy naszych zmiennych binarnych wskaże kiedy określone prawdopodobieństwo oznacza przynależność do konkretnej grupy.
+Po stworzeniu modelu należy znaleźć odpowiedni punkt odcięcia, który przy naszych zmiennych binarnych wskaże, kiedy określone prawdopodobieństwo oznacza przynależność do konkretnej grupy.
 
 ![](grafika/18.1RegLin.png)
 
 ## 5. 4. Regresja logistyczna
 
-Regresja Logistyczna polega na analogicznym moeleowaniu jak Regresja Liniowa jednakżę zamiast używać zależności liniowych nasz model będzie obliczał prawdopodobieństwa w zależności o krzywą logistyczną.
+Regresja Logistyczna polega na analogicznym modelowaniu jak Regresja Liniowa, jednakże, zamiast używać zależności liniowych, nasz model będzie obliczał prawdopodobieństwa w zależności o krzywą logistyczną.
 Tak wygląda krzywa logistyczna:
 
 ![](grafika/19RegLog.png)
 
-Sam model można modyfikować tylko za pomocą wybierania konkretnych zmiennych na których będziemy opierać nasz model.
-Bardzo pomocna jest funkcja summary() która pokazuje z jakich zmiennych stworzony jest nasz model i jaki wpływ na zachowanie ma każda zmienna.
+Sam model można modyfikować tylko za pomocą wybierania konkretnych zmiennych, na których będziemy opierać nasz model.
+Bardzo pomocna jest funkcja summary(), która pokazuje, z jakich zmiennych stworzony jest nasz model i jaki wpływ na zachowanie ma każda zmienna.
 
 ![](grafika/20RegLog.png)
 
-Model zachowuje się podobnie niezależnie od ilości zmiennych. 
-Metryki oczywiście zmieniają swoje wartości w zależności od modelu ale nie są to duże zmiany.
+Model zachowuje się podobnie niezależnie od ilości zmiennych.
+Metryki oczywiście zmieniają swoje wartości w zależności od modelu, ale nie są to duże zmiany.
 Model osiąga średnie wartości dla wszystkich przetestowanych wartości.
-Sama funkcja podumuwująca jest bardzo przydatna ponieważ daje nam ciekawy sposób na analize zależności między danymi.
-Podsumuwując ten model osiąga niezbyt imponujące wyniki widoczne poniżej:
+Sama funkcja podsumowująca jest bardzo przydatna, ponieważ daje nam ciekawy sposób na analizę zależności między danymi.
+Podsumowując, ten model osiąga niezbyt imponujące wyniki widoczne poniżej:
 
 ![](grafika/21RegLog.png)
 
@@ -227,27 +226,27 @@ Podsumuwując ten model osiąga niezbyt imponujące wyniki widoczne poniżej:
 Jest to rodzina klasyfikatorów używająca do pracy twierdzenia bayesa.
 $$ P(A \mid B) = \frac{P(B \mid A) \, P(A)}{P(B)} $$
 
-Aby nasz model mógł wykorzystać dane musimy je odpowiednio przetworzyć. 
-Z powodu swojej natury nie przyjmuje on wartości ciągłych(Warunkowość wyszła by dla każdej ciągłej wartości osobno co jest sprzeczne z założeniem modelu).
+Aby nasz model mógł wykorzystać dane, musimy je odpowiednio przetworzyć.
+Z powodu swojej natury nie przyjmuje on wartości ciągłych (warunkowość wyszłaby dla każdej ciągłej wartości osobno, co jest sprzeczne z założeniem modelu).
 Dlatego zmienne ciągłe "kubełkuje" się do grup z odpowiednimi przedziałami.
 
 ![](grafika/22Bayes.png)
 
-Nasz model tworzym z pakietu "e1071".
+Nasz model tworzy z pakietu "e1071".
 Po wytrenowaniu go można pokazać krzywą ROC
 
 ![](grafika/23Bayes.png)
 
 Tutaj również dopasowaliśmy punkt odcięcia.
-Podsumuwująć:
+Podsumowując:
 
 ![](grafika/24Bayes.png)
 
 # 6. Wybór najlepszego algorytmu uczenia maszynowego i implementacja
 
 Przetestowaliśmy 5 algorytmów.
-Najlepszym z nich okazał się klasyfikator bayesowski.
-Osiąga on znacznie lepsze wyniki niż reszta naszych klasyfikatoróW.
+Najlepszym z nich okazał się klasyfikator bayes-owski.
+Osiąga on znacznie lepsze wyniki niż reszta naszych klasyfikatorów.
 
 Bayes : 77.5 % Regresja Liniowa : 73.5%
 
@@ -255,7 +254,7 @@ Bayes : 77.5 % Regresja Liniowa : 73.5%
 
 To by było na tyle.
 
-Mamy nadzieję, że się podobało; ja myślę, że fajna robota (dopowiedź: Kuba).
+Mamy nadzieję, że się podobało; ja myślę, że fajna robota (dopowiedz: Kuba).
 ```{r session_info}
 sessionInfo()
 ```

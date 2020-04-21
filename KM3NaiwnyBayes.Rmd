@@ -11,18 +11,17 @@ library(e1071)
 library(ROCR)
 ```
 
-## Czym jest algorythm Naiwnego Bayesa?
+## Czym jest algorytm Naiwnego Bayesa?
 
-Jest to klasyfikator, a raczej rodzina klasyfikatorów , która opiera swoje działąnie na wzorze Bayesa.
+Jest to klasyfikator, a raczej rodzina klasyfikatorów, która opiera swoje działanie na wzorze Bayesa.
 Podstawowym założeniem jest tutaj niezależność wszystkich zmiennych.
-Sprawdzmy czy jest to prawdą
+Sprawdźmy, czy jest to prawdą.
 
 ## Przygotowanie danych
 
 Nasza ramka danych nie jest przygotowana na takie algorytmy.
-Wiele kolumn ma wartośći ciągłe jak np.: wzorst czy wynagrodzenie.
-Musimy podzielić takie wartości na przedziały tak aby nasze prawdopodobieństwa warunkowe nie miały tylko jednego przypadku.
-
+Wiele kolumn ma wartości ciągłe jak np.: wzrost czy wynagrodzenie.
+Musimy podzielić takie wartości na przedziały tak, aby nasze prawdopodobieństwa warunkowe nie miały tylko jednego przypadku.
 
 ```{r}
 data <- read.csv("german_credit_data_weka_dataset.csv")
@@ -44,7 +43,7 @@ data[,21] <- as.factor(as.character(data[,21]))
 levels(data[,21]) <- c("Good", "Bad")
 
 #podział ciągłych danych.
-data$age <- cut( data$age, breaks = seq( 10, 80, by = 10)) 
+data$age <- cut( data$age, breaks = seq( 10, 80, by = 10))
 data$duration <- cut( data$duration, breaks = c(0,12,24,36,48,60,72))
 
 for (column in names(data)) {data[,column] <- as.factor( data[,column])}
@@ -57,49 +56,48 @@ test_data <- head(data,n = 200)
 train_data <- tail(data,n = 800)
 ```
 
-
 ## Metryka Dokładności
 
 Do przetestowania modelu użyjemy czterech metryk.
 
 ```{r}
 accuracy <- function( table_in){
-  sum( diag( table_in)) / sum( table_in)
+sum( diag( table_in)) / sum( table_in)
 }
 
 f1 <- function( table_in) {
-  recall <- table_in[2,2] / sum( table_in[2,])
-  precicion <- table_in[2,2] / sum( table_in[,2])
-  ( 2*recall*precicion) / (recall + precicion)
+recall <- table_in[2,2] / sum( table_in[2,])
+precicion <- table_in[2,2] / sum( table_in[,2])
+( 2*recall*precicion) / (recall + precicion)
 }
 confusion_matrix_values <- function(confusion_matrix){
-  TP <- confusion_matrix[2,2]
-  TN <- confusion_matrix[1,1]
-  FP <- confusion_matrix[1,2]
-  FN <- confusion_matrix[2,1]
-  return (c(TP, TN, FP, FN))
+TP <- confusion_matrix[2,2]
+TN <- confusion_matrix[1,1]
+FP <- confusion_matrix[1,2]
+FN <- confusion_matrix[2,1]
+return (c(TP, TN, FP, FN))
 }
 
 accuracy2 <- function(confusion_matrix){
-  conf_matrix <- confusion_matrix_values(confusion_matrix)
-  return((conf_matrix[1] + conf_matrix[2]) / (conf_matrix[1] + conf_matrix[2] + conf_matrix[3] + conf_matrix[4]))
+conf_matrix <- confusion_matrix_values(confusion_matrix)
+return((conf_matrix[1] + conf_matrix[2]) / (conf_matrix[1] + conf_matrix[2] + conf_matrix[3] + conf_matrix[4]))
 }
 
 precision <- function(confusion_matrix){
-  conf_matrix <- confusion_matrix_values(confusion_matrix)
-  return(conf_matrix[1]/ (conf_matrix[1] + conf_matrix[3]))
+conf_matrix <- confusion_matrix_values(confusion_matrix)
+return(conf_matrix[1]/ (conf_matrix[1] + conf_matrix[3]))
 }
 
 recall <- function(confusion_matrix){
-  conf_matrix <- confusion_matrix_values(confusion_matrix)
-  return(conf_matrix[1] / (conf_matrix[1] + conf_matrix[4]))
+conf_matrix <- confusion_matrix_values(confusion_matrix)
+return(conf_matrix[1] / (conf_matrix[1] + conf_matrix[4]))
 }
 
 f2 <- function(confusion_matrix){
-  conf_matrix <- confusion_matrix_values(confusion_matrix)
-  rec <- recall(confusion_matrix)
-  prec <- precision(confusion_matrix)
-  return(2 * (rec * prec) / (rec + prec))
+conf_matrix <- confusion_matrix_values(confusion_matrix)
+rec <- recall(confusion_matrix)
+prec <- precision(confusion_matrix)
+return(2 * (rec * prec) / (rec + prec))
 }
 ```
 
@@ -107,13 +105,13 @@ f2 <- function(confusion_matrix){
 
 Do modelowania użyjemy funkcji naiveBayes() z pakietu "e1071".
 Oprócz danych i zmiennej celu nasz model ma jeszcze parametr **laplace**.
-Parametr ten jest głównie używany w NLP i po krótkiej analizie wnioskuje że nie wpływa on dobrze na model dlatego zostawimy go na domyślnym parametrze 0.
+Parametr ten jest głównie używany w NLP i po krótkiej analizie wnioskuje, że nie wpływa on dobrze na model, dlatego zostawimy go na domyślnym parametrze 0.
 
 ```{r}
 true_labels <- test_data[,n]
 #training | no need for higher laplance;
 nB <- naiveBayes( customer_type~. , data = train_data, laplace = 0)
-pred_nB_raw <-  predict( nB, test_data[-n], type = "raw")
+pred_nB_raw <- predict( nB, test_data[-n], type = "raw")
 ```
 
 ## Krzywa ROC
@@ -128,12 +126,11 @@ plot(ROC, col = as.list(1:10))
 abline( 0 ,1, col = "blue")
 ```
 
+## Najlepsze Parametry Odcięcia
 
-## Najlpesze Parametry Odcięcia
-
-Nasz model nie klasyfikuje binarnie tylko wyznacza prawdopodobieństwa dla każdej klasy zmiennej celu.
+Nasz model nie klasyfikuje binarnie, tylko wyznacza prawdopodobieństwa dla każdej klasy zmiennej celu.
 Nasz model ma tylko dwie wartości 0 i 1.
-Można więc spróbować ustwaić taki punkt odcieńcia dla którego nasz model okaże się najlepszy według naszych metryk.
+Można więc spróbować ustawić taki punkt odcięcia, dla którego nasz model okaże się najlepszy według naszych metryk.
 
 ```{r}
 acc <- rep(0,9)
@@ -141,24 +138,24 @@ f<-rep(0,9)
 rec<-rep(0,9)
 pre<-rep(0,9)
 for (i in 1:9) {
-  pred_nB <- factor( ifelse( pred_nB_raw[,1] > i/10, "Good", "Bad"), levels = c("Good","Bad"))
-  tab <- table( true_labels, pred_nB)
-  acc[i]<-accuracy(tab)
-  f[i]<- f1(tab)
-  rec[i] <- recall(tab)
-  pre[i] <- precision(tab)
+pred_nB <- factor( ifelse( pred_nB_raw[,1] > i/10, "Good", "Bad"), levels = c("Good","Bad"))
+tab <- table( true_labels, pred_nB)
+acc[i]<-accuracy(tab)
+f[i]<- f1(tab)
+rec[i] <- recall(tab)
+pre[i] <- precision(tab)
 }
 acc_max <- which.max(acc)
 f1_max <- which.max(f)
 ```
 
-Najlpesze prarametry odcięcia otrymujemy dla metryki celność w stosunku `r toString(acc_max*10)`%/`r toString((10-acc_max)*10)`%.
+Najlepsze parametry odcięcia otrzymujemy dla metryki celność w stosunku `r toString(acc_max*10)`%/`r toString((10-acc_max)*10)`%.
 
-Najlpesze prarametry odcięcia otrymujemy dla metryki f1 w stosunku `r toString(f1_max*10)`%/`r toString((10-f1_max)*10)`%.
+Najlepsze parametry odcięcia otrzymujemy dla metryki f1 w stosunku `r toString(f1_max*10)`%/`r toString((10-f1_max)*10)`%.
 
 ## Dokładne wyniki naszego modelu
 
-Podumujmy teraz prace naszego modelu:
+Podsumujmy teraz prace naszego modelu:
 
 ```{r}
 i=f1_max

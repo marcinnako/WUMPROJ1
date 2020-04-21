@@ -72,8 +72,8 @@ maxi = accuracy( table( y_test[,1], predicted_lab))
 best_split <- which.max( acc) *0.05
 ```
 
-Nasz model uzyskuje najlepszą celność przy podziale na 'r toString((1-best_split)*100)'% dla 1 (Dobry klient) oraz 'r toString((1-best_split)*100)'% dla 0 (Zły klient)
+Nasz model uzyskuje najlepszą celność przy podziale na `r toString((1-best_split)*100)`% dla 1 (Dobry klient) oraz `r toString((1-best_split)*100)`% dla 0 (Zły klient)
 
 ## Podsumowanie
 
-Nasz model regresji liniowej osiąga dla podziału 'r toString((1-best_split)*100)'%/'r toString((best_split)*100)'% osiągając przy tym 'r toString(maxi*100)'% celności.
+Nasz model regresji liniowej osiąga dla podziału `r toString((1-best_split)*100)`%/`r toString((best_split)*100)`% osiągając przy tym `r toString(maxi*100)`% celności.

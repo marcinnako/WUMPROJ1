@@ -120,7 +120,7 @@ pred_nB_raw <-  predict( nB, test_data[-n], type = "raw")
 
 Pokażmy teraz krzywą ROC
 
-```{r}
+```{r, echo=FALSE}
 library( ROCR)
 x <- prediction( pred_nB_raw[,1], true_labels)
 ROC <- performance( x, "tpr", "fpr")

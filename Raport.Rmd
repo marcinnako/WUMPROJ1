@@ -118,29 +118,32 @@ Końcowy efekt wyszedł encodingu wyszedł następujący:
 
 Tutaj kolory odpowiadające miarom:
 
+* żółty - *accuracy*
+* niebieski - *precision*
+* zielony - *recall*
+* czerwony - *f1*
+
 # 5. Poszukiwanie najlepszego modelu - dyskusja
 
-W celu wybrania tego jednego właściwego modelu, wpierw postanowiliśmy podzielić się popularnymi znanymi już przez nas metodami i indywidualne zajęcie się nimi.
+W celu wybrania tego jednego właściwego modelu, wpierw postanowiliśmy podzielić się popularnymi znanymi już przez nas metodami i indywidualne zajęcie się nimi. Stworzyliśmy następujące modele:
 
-**Rozpatrzyliśmy i przetestowaliśmy dla różnych hiperparametrów cztery algorytmy uczenia maszynowego**:
+1. Drzewa
 
-1. Drzewo klasyfikacyjne i lasy losowe
+2. K najbliższych sąsiadów
 
-2. Regresja liniowa
+3. Regresja Liniowa
 
-3. K-najbliższych sąsiadów
+4. Regresja Logistyczna
 
-4. Naiwny klasyfikator bayesowski
+5. Naiwny klasyfikator bayesowski
 
-... przy czym dla pierwszych trzech przygotowaliśmy dłuższe skrypty i raporty w formacie .Rmd - można je znaleźć pod [kolejno] *KM3Drzewa.Rmd*, *KM3Regresja.Rmd* i *KM3knn.Rmd*.
+Cała praca nad tworzeniem, badaniem i rozwijaniem modeli została opisana w osobnych raportach. Kojejno: *KM3Drzewa.Rmd*, *KM3Knn.Rmd*, *KM3RegresjaLiniowa.Rmd*, *KM3RegresjaLogistyczna.Rmd* i *KM3NaiwnyBayes.Rmd*.
 
-Efekty testowania mniej godne zraportowania znajdują się także w pojedynczych skryptach: *lm.r*, *nb.r* i *knn.r*.
+## 5.1. Drzewo klasyfikacyjny i las losowy
 
 Ku porównaniu efektów modeli postanowiliśmy porównywać cztery chyba najbardziej podstawowe w tej kwestii, ale i przy tym dające ogrom informacji miary: **accuracy**, **precision**, **recall** i **f1**.
 
 ![](grafika/11MiaryOcenaKlasyfikatora.png)
-
-## 5.1. Drzewo klasyfikacyjny i las losowy
 
 Uruchomienie algorytmu z pakietu *rpart* dało mało satysfakcjonujący wynik w myśli o logice biznesowej.
 
@@ -169,73 +172,84 @@ W efekcie otrzymaliśmy taką oto tabelkę:
 
 ![](grafika/15PorownanieMiar.png)
 
-
 Ze względu na koncepcję naszego zadania, stwierdziliśmy, że **sumarycznie najlepiej wypada drzewo losowe o głębokości 6**.
 
 ## 5.2. k najbliższych sąsiadów
 
-... napisaliśmy oczywiście ze wskazaną wcześniejszą **normalizacją**.
+Jest to algorytm polegający na "porównaniu" badanej próbki z wartościami które mamy w bazie i wywnioskowanie na podstawie *k* rekordów z bazy jak zklasyfikować próbkę.
+Do tego potrebujemy specjalnie unormowanych danych.
 
-![](grafika/K1Normalizacja.png)
+![](grafika/16Knn-Normalizacja.png)
 
-Również i tutaj przeszukaliśmy różne hyperparameters w celu znalezienia tego najlepszego.
+Używając funkcji knn() z pakietu class możemy stworzyć nasz model.
+Pozostaje nam dopasowanie parametru *k* tak aby nasz model był jak najbardziej optymalny.
+Do tego posłużymy się zwykłą metryką celności (% poprawnych klasyfikacji)
 
-Najbardziej satysfakcjonujący wydał się **efekt dla k = 26**.
+![](grafika/17Knn-Wyrres(2).png)
 
-![](grafika/K2NajlepszeK.png)
+Otrzymujemy parametr *k = 11*.
 
-Finalnie otrzymaliśmy *acccuracy* na poziomie 70%, a *confusion matrix* zaprezentował się tak:
+![](grafika/17.1KnnWyniki.png)
 
-![](grafika/K3ConfusionMatrix.png)
 
 ## 5.3. Regresja liniowa
 
-Tutaj z pomocą przyszła nam funkcja *glm()*. Po dopasowaniu dobry obraz dała nam także metoda *summary*, ładnie podsumowująca co automatyczne narzędzie utworzyło.
+Regresja liniowa polega na stworzeniu modelu na podstawie zależności liniowych pomiędzy zmiennymi.
 
-![](grafika/Reg1GlmFit.png)
+![](grafika/18RegLin.png)
 
-Tak zaimplementowana regresja liniowa nie daje binarnego dopasowania tak / nie, lecz prawdopodobieństwa na owe dwa stany. Postanowiliśmy najprościej - i chyba na tym poziomie najlepiej - przyjąc, że **jeśli p-stwo na "tak" >50% - klient został uznany za zdolnego finansowo**. Jeśli nie - przeciwnie.
+Po stworzeniu modelu należy znaleść odpowiedni punkt odcieńcia który przy naszych zmiennych binarnych wskaże kiedy określone prawdopodobieństwo oznacza przynależność do konkretnej grupy.
 
-![](grafika/Reg2Accuracy.png)
+![](grafika/18.1RegLin.png)
 
-Macierz pomyłek i wcześniej zaplanowane badane miary zaprezentowały się następująco:
+## 5. 4. Regresja logistyczna
 
-![](grafika/Reg3ConfusionMatrix.png)
+Regresja Logistyczna polega na analogicznym moeleowaniu jak Regresja Liniowa jednakżę zamiast używać zależności liniowych nasz model będzie obliczał prawdopodobieństwa w zależności o krzywą logistyczną.
+Tak wygląda krzywa logistyczna:
 
-![](grafika/Reg4Miary.png)
+![](grafika/19RegLog.png)
 
-W celu uzyskania potencjalnie lepszych wyników postanowiliśmy także pozbyć się tych kolumn, które według *summary()* najmniej wpływaną na model.
+Sam model można modyfikować tylko za pomocą wybierania konkretnych zmiennych na których będziemy opierać nasz model.
+Bardzo pomocna jest funkcja summary() która pokazuje z jakich zmiennych stworzony jest nasz model i jaki wpływ na zachowanie ma każda zmienna.
 
-![](grafika/Reg5Miary2.png)
+![](grafika/20RegLog.png)
 
-Miary nie okazały się być jednak lepsze.
+Model zachowuje się podobnie niezależnie od ilości zmiennych. 
+Metryki oczywiście zmieniają swoje wartości w zależności od modelu ale nie są to duże zmiany.
+Model osiąga średnie wartości dla wszystkich przetestowanych wartości.
+Sama funkcja podumuwująca jest bardzo przydatna ponieważ daje nam ciekawy sposób na analize zależności między danymi.
+Podsumuwując ten model osiąga niezbyt imponujące wyniki widoczne poniżej:
 
-Bardziej satysfakcjonujący wynik dało za to usunięcie zmiennych:
+![](grafika/21RegLog.png)
 
-* *age*
-* *is_foreign_worker*
-* *present_employment*
-* *property*
-* *checking_account_status*
-* *is_single*
+## 5. 5. Naiwny klasyfikator bayesowski
 
-Tutaj już radość została osiągnięta.
+Jest to rodzina klasyfikatorów używająca do pracy twierdzenia bayesa.
+$$ P(A \mid B) = \frac{P(B \mid A) \, P(A)}{P(B)} $$
 
-![](grafika/Reg6Miary3.png)
+Aby nasz model mógł wykorzystać dane musimy je odpowiednio przetworzyć. 
+Z powodu swojej natury nie przyjmuje on wartości ciągłych(Warunkowość wyszła by dla każdej ciągłej wartości osobno co jest sprzeczne z założeniem modelu).
+Dlatego zmienne ciągłe "kubełkuje" się do grup z odpowiednimi przedziałami.
 
-Ostatecznie postanowiliśmy jeszcze wziąć tylko pięć kolumn o największym znaczeniu według *summary()*.
+![](grafika/22Bayes.png)
 
-![](grafika/Reg7Miary4.png)
+Nasz model tworzym z pakietu "e1071".
+Po wytrenowaniu go można pokazać krzywą ROC
 
-... taki model okazał się jednak bardzo zły, gdyż wszystkie obserwacje zostały zaklasyfikowane jako prawdziwe.
+![](grafika/23Bayes.png)
 
-**Podsumowując** najlepszy okazał się model pierwszy - chyba, że najważniejsze znaczenie miałoby mieć *recall* - wtedy przy nieco gorszym *precision* i *accuracy* wygrywa model nieuwzględniający wspomnianych wcześniej sześciu parametrów.
+Tutaj również dopasowaliśmy punkt odcięcia.
+Podsumuwująć:
+
+![](grafika/24Bayes.png)
 
 # 6. Wybór najlepszego algorytmu uczenia maszynowego i implementacja
 
-**BAYES??**
+Przetestowaliśmy 5 algorytmów.
+Najlepszym z nich okazał się klasyfikator bayesowski.
+Osiąga on znacznie lepsze wyniki niż reszta naszych klasyfikatoróW.
 
-**TODO**
+Bayes : 77.5 % Regresja Liniowa : 73.5%
 
 # 7. Zakończenie
 

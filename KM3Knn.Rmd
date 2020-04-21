@@ -44,11 +44,37 @@ for( coli in 1:dim(x_train)[2]){
 
 ## Metryka dokładności
 
-Do pomocy w określeniu jakośći naszego modelu napiszemy funkcje która wylicY 
+Do pomocy w określeniu jakośći naszego modelu napiszemy funkcje która wyliczy nam konkretne metryki.
 
 ```{r}
-accuracy <- function( table_in){
-  sum( diag( table_in)) / sum( table_in)
+confusion_matrix_values <- function(confusion_matrix){
+  TP <- confusion_matrix[2,2]
+  TN <- confusion_matrix[1,1]
+  FP <- confusion_matrix[1,2]
+  FN <- confusion_matrix[2,1]
+  return (c(TP, TN, FP, FN))
+}
+
+accuracy <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  return((conf_matrix[1] + conf_matrix[2]) / (conf_matrix[1] + conf_matrix[2] + conf_matrix[3] + conf_matrix[4]))
+}
+
+precision <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  return(conf_matrix[1]/ (conf_matrix[1] + conf_matrix[3]))
+}
+
+recall <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  return(conf_matrix[1] / (conf_matrix[1] + conf_matrix[4]))
+}
+
+f1 <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  rec <- recall(confusion_matrix)
+  prec <- precision(confusion_matrix)
+  return(2 * (rec * prec) / (rec + prec))
 }
 ```
 
@@ -60,11 +86,17 @@ Do obliczenia jakośći naszego modelu sprawdzimy jego działanie w z parametrem
 ```{r}
 n <- sqrt( dim(x_train)[1]) 
 acc <- rep(0,n)
+ftest<- rep(0,n)
+rec <- rep(0,n)
+pre <- rep(0,n)
 for(k in 1:n){
   test_pred <- knn( train = x_train[1:800,], test = x_test, cl = y_train[1:800,], k=k)
   
   tab <-  table( y_test[,1], test_pred)
   acc[k] <- accuracy(tab)
+  ftest[k] <- f1(tab)
+  rec[k] <- recall(tab)
+  pre[k] <- precision(tab)
 }
 k=1:n
 best_k <- which.max( acc)
@@ -74,8 +106,16 @@ Po przeiterowaniu przez wszytskie parametry zmiennej k można pokazać dane na w
 
 
 ```{r}
-plot( k, acc, type = "l", lwd = 3)
-lines(c(best_k,best_k),c(0,acc[best_k]),col = "green",lwd = 3)
+plot(k, acc, type = "l", lwd = 3, xlim = c(0,n),ylim = c(0,1), col = "#5C5B5A")
+lines(k,ftest,type = "l", lwd = 3,col = "#870A30")
+lines(k,rec,type = "l", lwd = 3,col = "#348BA5")
+lines(k,pre,type = "l", lwd = 3,col = "#FF9A29")
+lines(c(best_k,best_k),c(0,acc[best_k]),col = "#005500",lwd = 3)
+legend("bottomleft", legend = c("Accuracy","F1","Precision","Recall"),
+  col = c("#5C5B5A","#870A30","#FF9A29","#348BA5"),
+  pch = c(17,19), 
+  text.col = "black", 
+  horiz = F )
 ```
 
 Jak widać na wykresie najwyższą wartość celności ,zaznaczoną na zielono, nasz model uzyskuje dla parametru k = `r toString(best_k)`.

@@ -59,6 +59,9 @@ Sprawdzmy to teraz.
 
 ```{r}
 acc <- rep(0, 21)
+ftest <- rep(0, 21)
+rec <- rep(0, 21)
+pre <- rep(0, 21)
 maxi=0
 for( i in 0:20){
   predicted_lab <- ifelse( pred_train > i*0.05, 1, 0)
@@ -71,6 +74,8 @@ best_split <- which.max( acc) *0.05
 ```
 
 Nasz model uzyskuje najlepszą celność przy podziale na `r toString((1-best_split)*100)`% dla 1 (Dobry kient) oraz  `r toString((1-best_split)*100)`% dla 0 (Zły kient)
+
+
 
 ## Podsumowanie
 

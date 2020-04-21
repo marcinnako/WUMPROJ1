@@ -60,7 +60,7 @@ train_data <- tail(data,n = 800)
 
 ## Metryka Dokładności
 
-Do przetestowania modelu użyjemy zwykłej metryki celnośći obliczającej procent poprawnych odpowiedzi oraz metryki F1 która jest harmoniczną średnią średnichich poprawnych przyporządkowań złego kilienta i poprawnych przyporządkowań dobrego klienta.
+Do przetestowania modelu użyjemy czterech metryk.
 
 ```{r}
 accuracy <- function( table_in){
@@ -71,6 +71,35 @@ f1 <- function( table_in) {
   recall <- table_in[2,2] / sum( table_in[2,])
   precicion <- table_in[2,2] / sum( table_in[,2])
   ( 2*recall*precicion) / (recall + precicion)
+}
+confusion_matrix_values <- function(confusion_matrix){
+  TP <- confusion_matrix[2,2]
+  TN <- confusion_matrix[1,1]
+  FP <- confusion_matrix[1,2]
+  FN <- confusion_matrix[2,1]
+  return (c(TP, TN, FP, FN))
+}
+
+accuracy2 <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  return((conf_matrix[1] + conf_matrix[2]) / (conf_matrix[1] + conf_matrix[2] + conf_matrix[3] + conf_matrix[4]))
+}
+
+precision <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  return(conf_matrix[1]/ (conf_matrix[1] + conf_matrix[3]))
+}
+
+recall <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  return(conf_matrix[1] / (conf_matrix[1] + conf_matrix[4]))
+}
+
+f2 <- function(confusion_matrix){
+  conf_matrix <- confusion_matrix_values(confusion_matrix)
+  rec <- recall(confusion_matrix)
+  prec <- precision(confusion_matrix)
+  return(2 * (rec * prec) / (rec + prec))
 }
 ```
 
@@ -109,11 +138,15 @@ Można więc spróbować ustwaić taki punkt odcieńcia dla którego nasz model 
 ```{r}
 acc <- rep(0,9)
 f<-rep(0,9)
+rec<-rep(0,9)
+pre<-rep(0,9)
 for (i in 1:9) {
   pred_nB <- factor( ifelse( pred_nB_raw[,1] > i/10, "Good", "Bad"), levels = c("Good","Bad"))
   tab <- table( true_labels, pred_nB)
   acc[i]<-accuracy(tab)
   f[i]<- f1(tab)
+  rec[i] <- recall(tab)
+  pre[i] <- precision(tab)
 }
 acc_max <- which.max(acc)
 f1_max <- which.max(f)
@@ -134,8 +167,12 @@ tab <- table( true_labels, pred_nB)
 knitr::kable(tab)
 ```
 
-Dla punktu odcieńcia `r toString(f1_max*0.1)` otrzymujemy następujące wyniki:
+Dla punktu odcięcia `r toString(acc_max*0.1)` otrzymujemy następujące wyniki:
 
-Celność : `r toString(acc[f1_max])`
+Celność : `r toString(acc[acc_max])`
 
-F1 : `r toString(f[f1_max])`
+F1 : `r toString(f[acc_max])`
+
+Recall : `r toString(rec[acc_max])`
+
+Precision : `r toString(pre[acc_max])`
